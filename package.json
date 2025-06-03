@@ -2,8 +2,8 @@
   "name": "vue-instant",
   "version": "1.0.0",
   "description": "Reusable Vue components and JS helpers to integrate with Laravel Instant",
-  "main": "./dist/vue-shared-library.umd.js",
-  "module": "./dist/vue-shared-library.es.js",
+  "main": "./dist/vue-instant.umd.js",
+  "module": "./dist/vue-instant.es.js",
   "types": "./dist/index.d.ts",
   "files": [
     "dist"
