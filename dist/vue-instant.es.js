@@ -25,7 +25,7 @@ const Vt = /* @__PURE__ */ De(Me, [["render", Ne]]), ze = { class: "dialog-foote
   emits: /* @__PURE__ */ ne(["update:modelValue", "onConfirm"], ["update:modelValue"]),
   setup(e, { emit: t }) {
     const a = xe(e, "modelValue"), u = e, o = t;
-    return (l, d) => {
+    return (n, d) => {
       const k = _("el-button"), x = _("el-dialog");
       return s(), c(x, {
         modelValue: a.value,
@@ -191,8 +191,8 @@ function A(e, t) {
 }
 function be(e, t, a) {
   return new Promise((u, o) => {
-    q(e).post(e, t, a).then((l) => u(l)).catch((l) => {
-      o(l);
+    q(e).post(e, t, a).then((n) => u(n)).catch((n) => {
+      o(n);
     });
   });
 }
@@ -205,8 +205,8 @@ function Ke(e, t) {
 }
 function we(e, t, a) {
   return new Promise((u, o) => {
-    q().put(e, t, a).then((l) => u(l)).catch((l) => {
-      o(l);
+    q().put(e, t, a).then((n) => u(n)).catch((n) => {
+      o(n);
     });
   });
 }
@@ -243,10 +243,10 @@ function ee(e, t) {
   let o;
   for (; (o = a.exec(e)) !== null; )
     u.push(o[1]);
-  let l = e;
+  let n = e;
   return u.forEach((d) => {
-    l = l.replace(`{${d}}`, t[d]);
-  }), l ?? "";
+    n = n.replace(`{${d}}`, t[d]);
+  }), n ?? "";
 }
 function Ze(e) {
   var a;
@@ -411,10 +411,10 @@ const mt = /* @__PURE__ */ S({
   },
   emits: ["update:modelValue"],
   setup(e, { expose: t, emit: a }) {
-    const u = a, o = e, l = E([]), d = E(""), k = le(() => o.fieldLabel ?? "name"), x = le(() => o.fieldValue ?? "id");
+    const u = a, o = e, n = E([]), d = E(""), k = le(() => o.fieldLabel ?? "name"), x = le(() => o.fieldValue ?? "id");
     function g() {
       A(`undefined/${o.url}`).then((V) => {
-        l.value = V.data.data;
+        n.value = V.data.data;
       });
     }
     function B(V) {
@@ -431,11 +431,11 @@ const mt = /* @__PURE__ */ S({
           limit: 10
         }
       }).then((M) => {
-        l.value = M.data.data;
+        n.value = M.data.data;
       });
     }
     return te(() => {
-      o.url && o.autoFetch && g(), o.options && (l.value = o.options);
+      o.url && o.autoFetch && g(), o.options && (n.value = o.options);
     }), t({
       fetchingDataFromServer: g
     }), (V, m) => {
@@ -453,7 +453,7 @@ const mt = /* @__PURE__ */ S({
         "remote-show-suffix": ""
       }, {
         default: f(() => [
-          (s(!0), C(N, null, R(l.value, (r) => (s(), c(U, {
+          (s(!0), C(N, null, R(n.value, (r) => (s(), c(U, {
             key: r[x.value],
             label: b(ie)(r, k.value),
             value: r[x.value] ?? r.id
@@ -470,7 +470,7 @@ const mt = /* @__PURE__ */ S({
         filterable: ""
       }, {
         default: f(() => [
-          (s(!0), C(N, null, R(l.value, (r) => (s(), c(U, {
+          (s(!0), C(N, null, R(n.value, (r) => (s(), c(U, {
             key: r[x.value],
             label: b(ie)(r, k.value),
             value: r[x.value] ?? r.id
@@ -500,31 +500,31 @@ const mt = /* @__PURE__ */ S({
   },
   emits: ["store", "update", "delete", "form"],
   setup(e, { expose: t, emit: a }) {
-    const u = a, o = e, l = _e({}), d = E(), k = he(), x = ve();
-    function g(r, n) {
+    const u = a, o = e, n = _e({}), d = E(), k = he(), x = ve();
+    function g(r, i) {
       if (typeof r == "number") return r;
-      if (typeof r == "object" && n) return r[n];
+      if (typeof r == "object" && i) return r[i];
       if (typeof r == "object") return r.default;
     }
     function B() {
       A(
         `undefined/${o.fetchUrl}/${k.params.id}${o.paramsUrl}`
-      ).then((r) => Object.assign(l, r.data.data)).catch(j);
+      ).then((r) => Object.assign(n, r.data.data)).catch(j);
     }
     function V() {
       o.columns.forEach((r) => {
-        r.type === "select" || r.type === "text" || r.type === "textarea" || r.type === "password" ? l[r.name] = r.value ?? "" : r.type === "switch" || r.type === "checkbox" ? l[r.name] = r.value ?? 0 : (r.type === "slot" || r.type === "hide") && (l[r.name] = r.value ?? "");
-      }), console.log("initializeForm", l, o.columns);
+        r.type === "select" || r.type === "text" || r.type === "textarea" || r.type === "password" ? n[r.name] = r.value ?? "" : r.type === "switch" || r.type === "checkbox" ? n[r.name] = r.value ?? 0 : (r.type === "slot" || r.type === "hide") && (n[r.name] = r.value ?? "");
+      }), console.log("initializeForm", n, o.columns);
     }
     function m() {
-      u("form", l);
+      u("form", n);
     }
     async function U() {
       d.value && await d.value.validate((r) => {
-        console.log("valid", r), r && be(`undefined/${o.storeUrl}${o.paramsUrl}`, l).then((n) => {
-          if (Z(n)) {
-            if (I(n.data.message, "success"), u("store", n.data.data), o.redirectAfterStoreUrl)
-              return x.push(o.redirectAfterStoreUrl(n.data.data));
+        console.log("valid", r), r && be(`undefined/${o.storeUrl}${o.paramsUrl}`, n).then((i) => {
+          if (Z(i)) {
+            if (I(i.data.message, "success"), u("store", i.data.data), o.redirectAfterStoreUrl)
+              return x.push(o.redirectAfterStoreUrl(i.data.data));
             o.backUrl && x.push(`/${o.backUrl}`);
           }
         }).catch(j);
@@ -534,9 +534,9 @@ const mt = /* @__PURE__ */ S({
       d.value && await d.value.validate((r) => {
         console.log("valid", r), r && we(
           `undefined/${o.storeUrl}/${k.params.id}/${o.paramsUrl}`,
-          l
-        ).then((n) => {
-          Z(n) && (I(n.data.message, "success"), u("store", n.data.data), o.backUrl && x.push(`/${o.backUrl}`));
+          n
+        ).then((i) => {
+          Z(i) && (I(i.data.message, "success"), u("store", i.data.data), o.backUrl && x.push(`/${o.backUrl}`));
         }).catch(j);
       });
     }
@@ -546,10 +546,10 @@ const mt = /* @__PURE__ */ S({
       k.params.id && B(), V();
     }), t({
       initializeForm: V
-    }), (r, n) => {
+    }), (r, i) => {
       const $ = _("el-input"), O = _("el-switch"), T = _("el-form-item"), K = _("el-checkbox"), G = _("el-col"), Q = _("el-row"), F = _("el-button"), p = _("RouterLink"), W = _("el-form");
       return s(), c(W, {
-        model: l,
+        model: n,
         rules: o.rules,
         ref_key: "ruleFormRef",
         ref: d,
@@ -560,97 +560,97 @@ const mt = /* @__PURE__ */ S({
         default: f(() => [
           w(Q, { gutter: 20 }, {
             default: f(() => [
-              (s(!0), C(N, null, R(o.columns, (i, ke) => (s(), C(N, { key: ke }, [
-                ["hide"].includes(i.type) ? h("", !0) : (s(), c(G, {
+              (s(!0), C(N, null, R(o.columns, (l, ke) => (s(), C(N, { key: ke }, [
+                ["hide"].includes(l.type) ? h("", !0) : (s(), c(G, {
                   key: 0,
-                  span: g(i.grid ?? 24),
-                  sm: g(i.grid ?? 24, "sm"),
-                  md: g(i.grid ?? 24, "md"),
-                  lg: g(i.grid ?? 24, "lg"),
-                  xl: g(i.grid ?? 24, "xl")
+                  span: g(l.grid ?? 24),
+                  sm: g(l.grid ?? 24, "sm"),
+                  md: g(l.grid ?? 24, "md"),
+                  lg: g(l.grid ?? 24, "lg"),
+                  xl: g(l.grid ?? 24, "xl")
                 }, {
                   default: f(() => [
-                    ["checkbox", "slot:el-form-item"].includes(i.type) ? h("", !0) : (s(), c(T, {
+                    ["checkbox", "slot:el-form-item"].includes(l.type) ? h("", !0) : (s(), c(T, {
                       key: 0,
-                      label: i.label,
-                      prop: i.name
+                      label: l.label,
+                      prop: l.name
                     }, {
                       default: f(() => {
                         var L, oe, ae;
                         return [
-                          i.type === "text" ? (s(), c($, {
+                          l.type === "text" ? (s(), c($, {
                             key: 0,
-                            modelValue: l[i.name],
-                            "onUpdate:modelValue": (D) => l[i.name] = D,
-                            disabled: i.disabled,
+                            modelValue: n[l.name],
+                            "onUpdate:modelValue": (D) => n[l.name] = D,
+                            disabled: l.disabled,
                             onChange: m
                           }, null, 8, ["modelValue", "onUpdate:modelValue", "disabled"])) : h("", !0),
-                          i.type === "textarea" ? (s(), c($, {
+                          l.type === "textarea" ? (s(), c($, {
                             key: 1,
-                            modelValue: l[i.name],
-                            "onUpdate:modelValue": (D) => l[i.name] = D,
+                            modelValue: n[l.name],
+                            "onUpdate:modelValue": (D) => n[l.name] = D,
                             type: "textarea",
-                            disabled: i.disabled,
+                            disabled: l.disabled,
                             onChange: m
                           }, null, 8, ["modelValue", "onUpdate:modelValue", "disabled"])) : h("", !0),
-                          i.type === "select" ? (s(), c(mt, {
+                          l.type === "select" ? (s(), c(mt, {
                             key: 2,
-                            modelValue: l[i.name],
-                            "onUpdate:modelValue": (D) => l[i.name] = D,
-                            url: i.url,
-                            "field-label": i.field_label ?? "name",
-                            "field-value": i.field_value ?? "id",
-                            options: i.options,
-                            disabled: i.disabled,
-                            remote: (L = i.selectOptions) == null ? void 0 : L.remote,
+                            modelValue: n[l.name],
+                            "onUpdate:modelValue": (D) => n[l.name] = D,
+                            url: l.url,
+                            "field-label": l.field_label ?? "name",
+                            "field-value": l.field_value ?? "id",
+                            options: l.options,
+                            disabled: l.disabled,
+                            remote: (L = l.selectOptions) == null ? void 0 : L.remote,
                             "remote-search": {
-                              field: (oe = i.selectOptions) == null ? void 0 : oe.remoteSearchField,
-                              strict: (ae = i.selectOptions) == null ? void 0 : ae.remoteSearchStrict
+                              field: (oe = l.selectOptions) == null ? void 0 : oe.remoteSearchField,
+                              strict: (ae = l.selectOptions) == null ? void 0 : ae.remoteSearchStrict
                             },
                             onChange: m
                           }, null, 8, ["modelValue", "onUpdate:modelValue", "url", "field-label", "field-value", "options", "disabled", "remote", "remote-search"])) : h("", !0),
-                          i.type === "password" ? (s(), c($, {
+                          l.type === "password" ? (s(), c($, {
                             key: 3,
-                            modelValue: l[i.name],
-                            "onUpdate:modelValue": (D) => l[i.name] = D,
+                            modelValue: n[l.name],
+                            "onUpdate:modelValue": (D) => n[l.name] = D,
                             onChange: m,
                             type: "password",
                             "show-password": ""
                           }, null, 8, ["modelValue", "onUpdate:modelValue"])) : h("", !0),
-                          i.type === "switch" ? (s(), c(O, {
+                          l.type === "switch" ? (s(), c(O, {
                             key: 4,
-                            modelValue: l[i.name],
-                            "onUpdate:modelValue": (D) => l[i.name] = D,
+                            modelValue: n[l.name],
+                            "onUpdate:modelValue": (D) => n[l.name] = D,
                             onChange: m,
                             "active-icon": b(nt),
                             "inactive-icon": b(pe)
                           }, null, 8, ["modelValue", "onUpdate:modelValue", "active-icon", "inactive-icon"])) : h("", !0),
-                          i.type === "slot" ? P(r.$slots, i.name, {
+                          l.type === "slot" ? P(r.$slots, l.name, {
                             key: 5,
-                            form: l
+                            form: n
                           }) : h("", !0)
                         ];
                       }),
                       _: 2
                     }, 1032, ["label", "prop"])),
-                    ["checkbox"].includes(i.type) ? (s(), c(T, {
+                    ["checkbox"].includes(l.type) ? (s(), c(T, {
                       key: 1,
-                      prop: i.name
+                      prop: l.name
                     }, {
                       default: f(() => [
-                        i.type === "checkbox" ? (s(), c(K, {
+                        l.type === "checkbox" ? (s(), c(K, {
                           key: 0,
-                          modelValue: l[i.name],
-                          "onUpdate:modelValue": (L) => l[i.name] = L,
+                          modelValue: n[l.name],
+                          "onUpdate:modelValue": (L) => n[l.name] = L,
                           onChange: m,
-                          label: i.label
+                          label: l.label
                         }, null, 8, ["modelValue", "onUpdate:modelValue", "label"])) : h("", !0)
                       ]),
                       _: 2
                     }, 1032, ["prop"])) : h("", !0),
-                    i.type === "slot:el-form-item" ? P(r.$slots, i.name, {
+                    l.type === "slot:el-form-item" ? P(r.$slots, l.name, {
                       key: 2,
-                      form: l
+                      form: n
                     }) : h("", !0)
                   ]),
                   _: 2
@@ -669,7 +669,7 @@ const mt = /* @__PURE__ */ S({
                   type: "danger",
                   plain: ""
                 }, {
-                  default: f(() => n[0] || (n[0] = [
+                  default: f(() => i[0] || (i[0] = [
                     y("Batal")
                   ])),
                   _: 1,
@@ -685,7 +685,7 @@ const mt = /* @__PURE__ */ S({
               type: "primary",
               class: "ml-4"
             }, {
-              default: f(() => n[1] || (n[1] = [
+              default: f(() => i[1] || (i[1] = [
                 y(" Perbaharui ")
               ])),
               _: 1,
@@ -697,7 +697,7 @@ const mt = /* @__PURE__ */ S({
               type: "primary",
               class: "ml-4"
             }, {
-              default: f(() => n[2] || (n[2] = [
+              default: f(() => i[2] || (i[2] = [
                 y(" Simpan ")
               ])),
               _: 1,
@@ -724,7 +724,7 @@ const mt = /* @__PURE__ */ S({
   },
   emits: ["tableSelections"],
   setup(e, { expose: t, emit: a }) {
-    const u = a, o = e, l = E([]), d = E(0), k = E(10), x = E(1), g = E(!0), B = _e({
+    const u = a, o = e, n = E([]), d = E(0), k = E(10), x = E(1), g = E(!0), B = _e({
       data: {},
       collection: {
         data: []
@@ -734,9 +734,7 @@ const mt = /* @__PURE__ */ S({
       m();
     }
     function m() {
-      g.value = !0;
-      let r = o.fetchUrl;
-      /https?:\/\//i.test(o.fetchUrl) || (r = `undefined/${o.fetchUrl}`), A(r, {
+      g.value = !0, o.fetchUrl, /https?:\/\//i.test(o.fetchUrl) || `${o.fetchUrl}`, A(o.fetchUrl, {
         params: {
           relations: o.apiRelations,
           columns: o.apiColumns,
@@ -745,16 +743,16 @@ const mt = /* @__PURE__ */ S({
           queries: o.apiQuery,
           order: o.apiOrder
         }
-      }).then((n) => {
-        g.value = !1, l.value = n.data.data.data, d.value = n.data.data.total, B.collection = n.data.data;
-      }).catch((n) => {
-        g.value = !1, j(n);
+      }).then((r) => {
+        g.value = !1, n.value = r.data.data.data, d.value = r.data.data.total, B.collection = r.data.data;
+      }).catch((r) => {
+        g.value = !1, j(r);
       });
     }
     function U(r) {
       u(
         "tableSelections",
-        r.map((n) => n.id)
+        r.map((i) => i.id)
       );
     }
     function M() {
@@ -762,11 +760,11 @@ const mt = /* @__PURE__ */ S({
     }
     return te(() => {
       m();
-    }), t({ refresh: M }), (r, n) => {
+    }), t({ refresh: M }), (r, i) => {
       const $ = _("el-table-column"), O = _("el-icon"), T = _("RouterLink"), K = _("el-popover"), G = _("el-table"), Q = _("el-pagination"), F = Ve("loading");
       return s(), C("div", null, [
         Se((s(), c(G, {
-          data: l.value,
+          data: n.value,
           onSelectionChange: U,
           style: { width: "100%" }
         }, {
@@ -776,7 +774,7 @@ const mt = /* @__PURE__ */ S({
               width: "55",
               fixed: "left"
             }),
-            n[10] || (n[10] = y()),
+            i[10] || (i[10] = y()),
             (s(!0), C(N, null, R(o.tableColumns, (p, W) => (s(), C(N, { key: W }, [
               !p.value && p.type !== "slot" ? (s(), c($, {
                 key: 0,
@@ -785,7 +783,7 @@ const mt = /* @__PURE__ */ S({
                 width: p.width,
                 align: p.align ?? "left"
               }, null, 8, ["prop", "label", "width", "align"])) : h("", !0),
-              n[2] || (n[2] = y()),
+              i[2] || (i[2] = y()),
               p.value && p.type !== "slot" ? (s(), c($, {
                 key: 1,
                 prop: p.field,
@@ -793,12 +791,12 @@ const mt = /* @__PURE__ */ S({
                 width: p.width,
                 align: p.align ?? "left"
               }, {
-                default: f((i) => [
-                  y(ce(typeof p.value == "function" ? p.value(i.row) : ""), 1)
+                default: f((l) => [
+                  y(ce(typeof p.value == "function" ? p.value(l.row) : ""), 1)
                 ]),
                 _: 2
               }, 1032, ["prop", "label", "width", "align"])) : h("", !0),
-              n[3] || (n[3] = y()),
+              i[3] || (i[3] = y()),
               p.type === "slot" ? (s(), c($, {
                 key: 2,
                 prop: p.field,
@@ -806,15 +804,15 @@ const mt = /* @__PURE__ */ S({
                 width: p.width,
                 align: p.align ?? "left"
               }, {
-                default: f((i) => [
+                default: f((l) => [
                   P(r.$slots, p.field, {
-                    row: i.row
+                    row: l.row
                   })
                 ]),
                 _: 2
               }, 1032, ["prop", "label", "width", "align"])) : h("", !0)
             ], 64))), 128)),
-            n[11] || (n[11] = y()),
+            i[11] || (i[11] = y()),
             w($, {
               width: "55",
               fixed: "right"
@@ -850,13 +848,13 @@ const mt = /* @__PURE__ */ S({
                                 ]),
                                 _: 1
                               }),
-                              n[4] || (n[4] = y()),
-                              n[5] || (n[5] = v("span", { class: "ml-2" }, "Lihat", -1))
+                              i[4] || (i[4] = y()),
+                              i[5] || (i[5] = v("span", { class: "ml-2" }, "Lihat", -1))
                             ])
                           ]),
                           _: 2
                         }, 1032, ["to"])) : h("", !0),
-                        n[8] || (n[8] = y()),
+                        i[8] || (i[8] = y()),
                         o.editUrl ? (s(), c(T, {
                           key: 1,
                           to: b(Y)("/" + b(ee)(o.editUrl ?? "", p.row))
@@ -869,13 +867,13 @@ const mt = /* @__PURE__ */ S({
                                 ]),
                                 _: 1
                               }),
-                              n[6] || (n[6] = y()),
-                              n[7] || (n[7] = v("span", { class: "ml-2" }, "Ubah", -1))
+                              i[6] || (i[6] = y()),
+                              i[7] || (i[7] = v("span", { class: "ml-2" }, "Ubah", -1))
                             ])
                           ]),
                           _: 2
                         }, 1032, ["to"])) : h("", !0),
-                        n[9] || (n[9] = y()),
+                        i[9] || (i[9] = y()),
                         P(r.$slots, "action", {
                           row: p.row
                         })
@@ -896,9 +894,9 @@ const mt = /* @__PURE__ */ S({
         v("div", yt, [
           w(Q, {
             "page-size": k.value,
-            "onUpdate:pageSize": n[0] || (n[0] = (p) => k.value = p),
+            "onUpdate:pageSize": i[0] || (i[0] = (p) => k.value = p),
             "current-page": x.value,
-            "onUpdate:currentPage": n[1] || (n[1] = (p) => x.value = p),
+            "onUpdate:currentPage": i[1] || (i[1] = (p) => x.value = p),
             total: d.value,
             "page-sizes": [10, 25, 50, 75, 100],
             onChange: V,
