@@ -4,4 +4,5 @@ import { default as ComForm } from './components/ComForm.vue';
 import { default as ComSelect } from './components/ComSelect.vue';
 import { default as ComTable } from './components/ComTable.vue';
 import * as helpers from './utils/helpers';
-export { ComContainer, ComDialogConfirmation, ComForm, ComSelect, ComTable, helpers };
+import * as runtimeConfig from './config/runtimeConfig';
+export { ComContainer, ComDialogConfirmation, ComForm, ComSelect, ComTable, helpers, runtimeConfig };

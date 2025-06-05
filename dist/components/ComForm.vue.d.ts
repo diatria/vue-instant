@@ -48,6 +48,11 @@ declare const __VLS_component: import('vue').DefineComponent<import('vue').Extra
                 grid?: number | Record<string, number>;
                 value?: string | number;
                 disabled?: boolean;
+                selectOptions?: {
+                    remoteSearchField?: string;
+                    remoteSearchStrict?: boolean;
+                    remote?: boolean;
+                };
             }[];
             (...items: {
                 name: string;
@@ -60,6 +65,11 @@ declare const __VLS_component: import('vue').DefineComponent<import('vue').Extra
                 grid?: number | Record<string, number>;
                 value?: string | number;
                 disabled?: boolean;
+                selectOptions?: {
+                    remoteSearchField?: string;
+                    remoteSearchStrict?: boolean;
+                    remote?: boolean;
+                };
             }[]): {
                 name: string;
                 label?: string;
@@ -71,6 +81,11 @@ declare const __VLS_component: import('vue').DefineComponent<import('vue').Extra
                 grid?: number | Record<string, number>;
                 value?: string | number;
                 disabled?: boolean;
+                selectOptions?: {
+                    remoteSearchField?: string;
+                    remoteSearchStrict?: boolean;
+                    remote?: boolean;
+                };
             }[];
             new (arrayLength: number): {
                 name: string;
@@ -83,6 +98,11 @@ declare const __VLS_component: import('vue').DefineComponent<import('vue').Extra
                 grid?: number | Record<string, number>;
                 value?: string | number;
                 disabled?: boolean;
+                selectOptions?: {
+                    remoteSearchField?: string;
+                    remoteSearchStrict?: boolean;
+                    remote?: boolean;
+                };
             }[];
             new (...items: {
                 name: string;
@@ -95,6 +115,11 @@ declare const __VLS_component: import('vue').DefineComponent<import('vue').Extra
                 grid?: number | Record<string, number>;
                 value?: string | number;
                 disabled?: boolean;
+                selectOptions?: {
+                    remoteSearchField?: string;
+                    remoteSearchStrict?: boolean;
+                    remote?: boolean;
+                };
             }[]): {
                 name: string;
                 label?: string;
@@ -106,6 +131,11 @@ declare const __VLS_component: import('vue').DefineComponent<import('vue').Extra
                 grid?: number | Record<string, number>;
                 value?: string | number;
                 disabled?: boolean;
+                selectOptions?: {
+                    remoteSearchField?: string;
+                    remoteSearchStrict?: boolean;
+                    remote?: boolean;
+                };
             }[];
             isArray(arg: any): arg is any[];
             readonly prototype: any[];
@@ -166,6 +196,11 @@ declare const __VLS_component: import('vue').DefineComponent<import('vue').Extra
                 grid?: number | Record<string, number>;
                 value?: string | number;
                 disabled?: boolean;
+                selectOptions?: {
+                    remoteSearchField?: string;
+                    remoteSearchStrict?: boolean;
+                    remote?: boolean;
+                };
             }[];
             (...items: {
                 name: string;
@@ -178,6 +213,11 @@ declare const __VLS_component: import('vue').DefineComponent<import('vue').Extra
                 grid?: number | Record<string, number>;
                 value?: string | number;
                 disabled?: boolean;
+                selectOptions?: {
+                    remoteSearchField?: string;
+                    remoteSearchStrict?: boolean;
+                    remote?: boolean;
+                };
             }[]): {
                 name: string;
                 label?: string;
@@ -189,6 +229,11 @@ declare const __VLS_component: import('vue').DefineComponent<import('vue').Extra
                 grid?: number | Record<string, number>;
                 value?: string | number;
                 disabled?: boolean;
+                selectOptions?: {
+                    remoteSearchField?: string;
+                    remoteSearchStrict?: boolean;
+                    remote?: boolean;
+                };
             }[];
             new (arrayLength: number): {
                 name: string;
@@ -201,6 +246,11 @@ declare const __VLS_component: import('vue').DefineComponent<import('vue').Extra
                 grid?: number | Record<string, number>;
                 value?: string | number;
                 disabled?: boolean;
+                selectOptions?: {
+                    remoteSearchField?: string;
+                    remoteSearchStrict?: boolean;
+                    remote?: boolean;
+                };
             }[];
             new (...items: {
                 name: string;
@@ -213,6 +263,11 @@ declare const __VLS_component: import('vue').DefineComponent<import('vue').Extra
                 grid?: number | Record<string, number>;
                 value?: string | number;
                 disabled?: boolean;
+                selectOptions?: {
+                    remoteSearchField?: string;
+                    remoteSearchStrict?: boolean;
+                    remote?: boolean;
+                };
             }[]): {
                 name: string;
                 label?: string;
@@ -224,6 +279,11 @@ declare const __VLS_component: import('vue').DefineComponent<import('vue').Extra
                 grid?: number | Record<string, number>;
                 value?: string | number;
                 disabled?: boolean;
+                selectOptions?: {
+                    remoteSearchField?: string;
+                    remoteSearchStrict?: boolean;
+                    remote?: boolean;
+                };
             }[];
             isArray(arg: any): arg is any[];
             readonly prototype: any[];
