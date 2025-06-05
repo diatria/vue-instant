@@ -1,5 +1,5 @@
 {
-  "semi": true,
+  "semi": false,
   "singleQuote": true,
   "printWidth": 100,
   "tabWidth": 2,
@@ -8,5 +8,7 @@
   "bracketSpacing": true,
   "arrowParens": "avoid",
   "vueIndentScriptAndStyle": true,
-  "plugins": ["prettier-plugin-vue"]
+  "plugins": ["prettier-plugin-vue"],
+  "$schema": "https://json.schemastore.org/prettierrc",
+  "htmlWhitespaceSensitivity": "ignore"
 }
