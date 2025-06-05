@@ -48,7 +48,7 @@
     if (!/https?:\/\//i.test(props.fetchUrl)) {
       url = `${import.meta.env.VITE_API_URL}/${props.fetchUrl}`;
     }
-    httpGet(url, {
+    httpGet(props.fetchUrl, {
       params: {
         relations: props.apiRelations,
         columns: props.apiColumns,
