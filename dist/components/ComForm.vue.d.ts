@@ -15,11 +15,14 @@ type __VLS_Props = {
             url?: string;
             field_label?: string;
             field_value?: string;
+            fetch_on_click?: boolean;
+            remote?: boolean;
         };
+        placeholder?: string;
     }>;
     fetchUrl: string;
     queries?: Query;
-    redirectAfterStoreUrl?: Function;
+    redirectAfterStoreUrl?: (data: unknown) => string;
     rules?: FormRules;
     storeUrl: string;
 };
