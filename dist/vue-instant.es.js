@@ -850,3 +850,4 @@ export {
   Vt as urlToKebab,
   Ut as waiting
 };
+//# sourceMappingURL=vue-instant.es.js.map
