@@ -11,7 +11,7 @@
   import { Check, Close, Promotion } from '@element-plus/icons-vue';
   import type { FormInstance, FormRules } from 'element-plus';
   import { onBeforeMount, onMounted, reactive, ref } from 'vue';
-  import { useRoute, useRouter } from 'vue-router';
+  import { useRouter } from 'vue-router';
   import ComSelect from './ComSelect.vue';
   import { Query } from '../types';
 
@@ -51,7 +51,6 @@
 
   const form: Record<string, string | number> = reactive({});
   const ruleFormRef = ref<FormInstance>();
-  const route = useRoute();
   const router = useRouter();
 
   function columnGrid(
@@ -68,7 +67,7 @@
    */
 
   function getData() {
-    httpGet(`${props.fetchUrl}`)
+    httpGet(props.fetchUrl)
       .then(result => Object.assign(form, result.data.data))
       .catch(httpHandleError);
   }
@@ -93,7 +92,6 @@
         form[column.name] = column.value ?? '';
       }
     });
-    console.log('initializeForm', form, props.columns);
   }
 
   function onChange() {
@@ -107,9 +105,8 @@
     // Validation form input
     if (!ruleFormRef.value) return;
     await ruleFormRef.value.validate(valid => {
-      console.log('valid', valid);
       if (valid) {
-        httpPost(`${props.storeUrl}`, form)
+        httpPost(props.storeUrl, form)
           .then(result => {
             if (httpValidation(result)) {
               message(result.data.message, 'success');
@@ -130,9 +127,8 @@
   async function update() {
     if (!ruleFormRef.value) return;
     await ruleFormRef.value.validate(valid => {
-      console.log('valid', valid);
       if (valid) {
-        httpPut(`${props.storeUrl}`, form)
+        httpPut(props.storeUrl, form)
           .then(result => {
             if (httpValidation(result)) {
               message(result.data.message, 'success');
