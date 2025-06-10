@@ -7,13 +7,14 @@
     httpValidation,
     message,
     url,
-  } from '../utils/helpers';
+  } from '@/utils/helpers';
   import { Check, Close, Promotion } from '@element-plus/icons-vue';
   import type { FormInstance, FormRules } from 'element-plus';
   import { onBeforeMount, onMounted, reactive, ref } from 'vue';
   import { useRouter } from 'vue-router';
   import ComSelect from './ComSelect.vue';
-  import { Query } from '../types';
+  import { type Query } from '@/types';
+  import type { ResponseAxios } from '@/types/response';
 
   type columnType =
     | 'text'
@@ -40,11 +41,14 @@
         url?: string;
         field_label?: string;
         field_value?: string;
+        fetch_on_click?: boolean;
+        remote?: boolean;
       };
+      placeholder?: string;
     }>;
     fetchUrl: string;
     queries?: Query;
-    redirectAfterStoreUrl?: Function;
+    redirectAfterStoreUrl?: (data: unknown) => string;
     rules?: FormRules;
     storeUrl: string;
   }>();
@@ -68,7 +72,7 @@
 
   function getData() {
     httpGet(props.fetchUrl)
-      .then(result => Object.assign(form, result.data.data))
+      .then((result: ResponseAxios<unknown>) => Object.assign(form, result.data.data))
       .catch(httpHandleError);
   }
 
@@ -107,7 +111,7 @@
     await ruleFormRef.value.validate(valid => {
       if (valid) {
         httpPost(props.storeUrl, form)
-          .then(result => {
+          .then((result: ResponseAxios<unknown>) => {
             if (httpValidation(result)) {
               message(result.data.message, 'success');
               emits('store', result.data.data);
@@ -129,7 +133,7 @@
     await ruleFormRef.value.validate(valid => {
       if (valid) {
         httpPut(props.storeUrl, form)
-          .then(result => {
+          .then((result: ResponseAxios<unknown>) => {
             if (httpValidation(result)) {
               message(result.data.message, 'success');
               emits('store', result.data.data);
@@ -209,11 +213,14 @@
             <ComSelect
               v-if="column.type === 'select'"
               v-model="form[column.name]"
-              :url="column.select?.url"
+              :disabled="column.disabled"
+              :fetch-on-click="column.select?.fetch_on_click"
               :field-label="column.select?.field_label ?? 'name'"
               :field-value="column.select?.field_value ?? 'id'"
               :options="column.select?.options"
-              :disabled="column.disabled"
+              :placeholder="column.placeholder"
+              :remote="column.select?.remote"
+              :url="column.select?.url"
               @change="onChange"
             />
 
