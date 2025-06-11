@@ -513,23 +513,20 @@
   const _sfc_main$1 = /* @__PURE__ */ vue.defineComponent({
     __name: "ComForm",
     props: {
-      backUrl: {},
       columns: {},
       id: {},
       fetchUrl: {},
       queries: {},
-      redirectAfterStoreUrl: { type: Function },
       rules: {},
       storeUrl: {},
       url: {}
     },
-    emits: ["store", "update", "delete", "form"],
+    emits: ["back", "store", "update", "delete", "form"],
     setup(__props, { expose: __expose, emit: __emit }) {
-      const emits = __emit;
       const props = __props;
+      const emits = __emit;
       const form = vue.reactive({});
       const ruleFormRef = vue.ref();
-      const router = useRouter();
       function columnGrid(column, breakPoint) {
         if (typeof column === "number") return column;
         if (typeof column === "object" && breakPoint) return column[breakPoint];
@@ -572,10 +569,6 @@
               if (httpValidation(result)) {
                 message(result.data.message, "success");
                 emits("store", result.data.data);
-                if (props.redirectAfterStoreUrl) {
-                  return router.push(props.redirectAfterStoreUrl(result.data.data));
-                }
-                router.push(`/${url2}`);
               }
             }).catch(httpHandleError);
           }
@@ -590,7 +583,6 @@
               if (httpValidation(result)) {
                 message(result.data.message, "success");
                 emits("store", result.data.data);
-                router.push(`/${url2}`);
               }
             }).catch(httpHandleError);
           }
@@ -614,7 +606,6 @@
         const _component_el_col = vue.resolveComponent("el-col");
         const _component_el_row = vue.resolveComponent("el-row");
         const _component_el_button = vue.resolveComponent("el-button");
-        const _component_RouterLink = vue.resolveComponent("RouterLink");
         const _component_el_form = vue.resolveComponent("el-form");
         return vue.openBlock(), vue.createBlock(_component_el_form, {
           model: form,
@@ -728,24 +719,18 @@
               _: 3
             }),
             vue.createElementVNode("div", _hoisted_1$1, [
-              vue.createVNode(_component_RouterLink, {
-                to: vue.unref(url)(`/${props.backUrl ?? props.url}`)
+              vue.createVNode(_component_el_button, {
+                icon: vue.unref(close_default),
+                onClick: _cache[0] || (_cache[0] = ($event) => emits("back")),
+                type: "danger",
+                plain: ""
               }, {
-                default: vue.withCtx(() => [
-                  vue.createVNode(_component_el_button, {
-                    icon: vue.unref(close_default),
-                    type: "danger",
-                    plain: ""
-                  }, {
-                    default: vue.withCtx(() => _cache[0] || (_cache[0] = [
-                      vue.createTextVNode("Batal")
-                    ])),
-                    _: 1,
-                    __: [0]
-                  }, 8, ["icon"])
-                ]),
-                _: 1
-              }, 8, ["to"]),
+                default: vue.withCtx(() => _cache[1] || (_cache[1] = [
+                  vue.createTextVNode("Batal")
+                ])),
+                _: 1,
+                __: [1]
+              }, 8, ["icon"]),
               props.id ? (vue.openBlock(), vue.createBlock(_component_el_button, {
                 key: 0,
                 onClick: update,
@@ -753,11 +738,11 @@
                 type: "primary",
                 class: "ml-4"
               }, {
-                default: vue.withCtx(() => _cache[1] || (_cache[1] = [
+                default: vue.withCtx(() => _cache[2] || (_cache[2] = [
                   vue.createTextVNode(" Perbaharui ")
                 ])),
                 _: 1,
-                __: [1]
+                __: [2]
               }, 8, ["icon"])) : (vue.openBlock(), vue.createBlock(_component_el_button, {
                 key: 1,
                 onClick: store,
@@ -765,11 +750,11 @@
                 type: "primary",
                 class: "ml-4"
               }, {
-                default: vue.withCtx(() => _cache[2] || (_cache[2] = [
+                default: vue.withCtx(() => _cache[3] || (_cache[3] = [
                   vue.createTextVNode(" Simpan ")
                 ])),
                 _: 1,
-                __: [2]
+                __: [3]
               }, 8, ["icon"]))
             ])
           ]),

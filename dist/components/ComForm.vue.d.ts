@@ -1,33 +1,33 @@
 import { FormRules } from 'element-plus';
 import { Query } from '../types';
-type columnType = 'text' | 'textarea' | 'select' | 'password' | 'switch' | 'checkbox' | 'slot' | 'slot:el-form-item' | 'hide';
-type __VLS_Props = {
-    backUrl?: string;
-    columns: Array<{
-        name: string;
-        label?: string;
-        type: columnType;
-        grid?: number | Record<string, number>;
-        value?: string | number;
-        disabled?: boolean;
-        select?: {
-            options?: Array<unknown>;
-            url?: string;
-            field_label?: string;
-            field_value?: string;
-            fetch_on_click?: boolean;
-            remote?: boolean;
-        };
-        placeholder?: string;
-    }>;
+type ColumnSelect = {
+    options?: Array<unknown>;
+    url?: string;
+    field_label?: string;
+    field_value?: string;
+    fetch_on_click?: boolean;
+    remote?: boolean;
+};
+type ColumnType = 'text' | 'textarea' | 'select' | 'password' | 'switch' | 'checkbox' | 'slot' | 'slot:el-form-item' | 'hide';
+interface Column {
+    name: string;
+    label?: string;
+    type: ColumnType;
+    grid?: number | Record<string, number>;
+    value?: string | number;
+    disabled?: boolean;
+    select?: ColumnSelect;
+    placeholder?: string;
+}
+interface ComFormProps {
+    columns: Column[];
     id?: number;
     fetchUrl?: string;
     queries?: Query;
-    redirectAfterStoreUrl?: (data: unknown) => string;
     rules?: FormRules;
     storeUrl?: string;
     url: string;
-};
+}
 declare function initializeForm(): void;
 declare function __VLS_template(): {
     attrs: Partial<{}>;
@@ -42,16 +42,18 @@ declare function __VLS_template(): {
     rootEl: any;
 };
 type __VLS_TemplateResult = ReturnType<typeof __VLS_template>;
-declare const __VLS_component: import('vue').DefineComponent<__VLS_Props, {
+declare const __VLS_component: import('vue').DefineComponent<ComFormProps, {
     initializeForm: typeof initializeForm;
 }, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
     form: (...args: any[]) => void;
     delete: (...args: any[]) => void;
+    back: (...args: any[]) => void;
     store: (...args: any[]) => void;
     update: (...args: any[]) => void;
-}, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{
+}, string, import('vue').PublicProps, Readonly<ComFormProps> & Readonly<{
     onForm?: ((...args: any[]) => any) | undefined;
     onDelete?: ((...args: any[]) => any) | undefined;
+    onBack?: ((...args: any[]) => any) | undefined;
     onStore?: ((...args: any[]) => any) | undefined;
     onUpdate?: ((...args: any[]) => any) | undefined;
 }>, {}, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {

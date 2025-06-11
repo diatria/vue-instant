@@ -6,17 +6,24 @@
     httpPut,
     httpValidation,
     message,
-    url as helperUrl,
   } from '@/utils/helpers';
   import { Check, Close, Promotion } from '@element-plus/icons-vue';
   import type { FormInstance, FormRules } from 'element-plus';
   import { onBeforeMount, onMounted, reactive, ref } from 'vue';
-  import { useRouter } from 'vue-router';
   import ComSelect from './ComSelect.vue';
   import { type Query } from '@/types';
   import type { ResponseAxios } from '@/types/response';
 
-  type columnType =
+  type ColumnSelect = {
+    options?: Array<unknown>;
+    url?: string;
+    field_label?: string;
+    field_value?: string;
+    fetch_on_click?: boolean;
+    remote?: boolean;
+  };
+
+  type ColumnType =
     | 'text'
     | 'textarea'
     | 'select'
@@ -26,38 +33,33 @@
     | 'slot'
     | 'slot:el-form-item'
     | 'hide';
-  const emits = defineEmits(['store', 'update', 'delete', 'form']);
-  const props = defineProps<{
-    backUrl?: string;
-    columns: Array<{
-      name: string;
-      label?: string;
-      type: columnType;
-      grid?: number | Record<string, number>;
-      value?: string | number;
-      disabled?: boolean;
-      select?: {
-        options?: Array<unknown>;
-        url?: string;
-        field_label?: string;
-        field_value?: string;
-        fetch_on_click?: boolean;
-        remote?: boolean;
-      };
-      placeholder?: string;
-    }>;
+
+  interface Column {
+    name: string;
+    label?: string;
+    type: ColumnType;
+    grid?: number | Record<string, number>;
+    value?: string | number;
+    disabled?: boolean;
+    select?: ColumnSelect;
+    placeholder?: string;
+  }
+
+  interface ComFormProps {
+    columns: Column[];
     id?: number;
     fetchUrl?: string;
     queries?: Query;
-    redirectAfterStoreUrl?: (data: unknown) => string;
     rules?: FormRules;
     storeUrl?: string;
     url: string;
-  }>();
+  }
+
+  const props = defineProps<ComFormProps>();
+  const emits = defineEmits(['back', 'store', 'update', 'delete', 'form']);
 
   const form: Record<string, string | number> = reactive({});
   const ruleFormRef = ref<FormInstance>();
-  const router = useRouter();
 
   function columnGrid(
     column: number | Record<string, number>,
@@ -120,12 +122,6 @@
             if (httpValidation(result)) {
               message(result.data.message, 'success');
               emits('store', result.data.data);
-
-              if (props.redirectAfterStoreUrl) {
-                return router.push(props.redirectAfterStoreUrl(result.data.data));
-              }
-
-              router.push(`/${url}`);
             }
           })
           .catch(httpHandleError);
@@ -144,7 +140,6 @@
             if (httpValidation(result)) {
               message(result.data.message, 'success');
               emits('store', result.data.data);
-              router.push(`/${url}`);
             }
           })
           .catch(httpHandleError);
@@ -278,11 +273,7 @@
 
     <div class="flex justify-end border-t border-slate-200 border-solid pt-4">
 
-      <RouterLink :to="helperUrl(`/${props.backUrl ?? props.url}`)">
-
-        <el-button :icon="Close" type="danger" plain>Batal</el-button>
-
-      </RouterLink>
+      <el-button :icon="Close" @click="emits('back')" type="danger" plain>Batal</el-button>
 
       <el-button v-if="props.id" @click="update" :icon="Promotion" type="primary" class="ml-4">
          Perbaharui
