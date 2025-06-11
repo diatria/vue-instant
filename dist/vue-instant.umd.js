@@ -515,11 +515,13 @@
     props: {
       backUrl: {},
       columns: {},
+      id: {},
       fetchUrl: {},
       queries: {},
       redirectAfterStoreUrl: { type: Function },
       rules: {},
-      storeUrl: {}
+      storeUrl: {},
+      url: {}
     },
     emits: ["store", "update", "delete", "form"],
     setup(__props, { expose: __expose, emit: __emit }) {
@@ -534,7 +536,8 @@
         if (typeof column === "object") return column["default"];
       }
       function getData() {
-        httpGet(props.fetchUrl).then((result) => Object.assign(form, result.data.data)).catch(httpHandleError);
+        const url2 = props.fetchUrl ?? props.url;
+        httpGet(`${url2}/${props.id}`).then((result) => Object.assign(form, result.data.data)).catch(httpHandleError);
       }
       function initializeForm() {
         props.columns.forEach((column) => {
@@ -562,16 +565,32 @@
       }
       async function store() {
         if (!ruleFormRef.value) return;
+        const url2 = props.storeUrl ?? props.url;
         await ruleFormRef.value.validate((valid) => {
           if (valid) {
-            httpPost(props.storeUrl, form).then((result) => {
+            httpPost(url2, form).then((result) => {
               if (httpValidation(result)) {
                 message(result.data.message, "success");
                 emits("store", result.data.data);
                 if (props.redirectAfterStoreUrl) {
                   return router.push(props.redirectAfterStoreUrl(result.data.data));
                 }
-                if (props.backUrl) router.push(`/${props.backUrl}`);
+                router.push(`/${url2}`);
+              }
+            }).catch(httpHandleError);
+          }
+        });
+      }
+      async function update() {
+        if (!ruleFormRef.value) return;
+        const url2 = props.storeUrl ?? props.url;
+        await ruleFormRef.value.validate((valid) => {
+          if (valid) {
+            httpPut(`${url2}/${props.id}`, form).then((result) => {
+              if (httpValidation(result)) {
+                message(result.data.message, "success");
+                emits("store", result.data.data);
+                router.push(`/${url2}`);
               }
             }).catch(httpHandleError);
           }
@@ -581,7 +600,7 @@
         initializeForm();
       });
       vue.onMounted(() => {
-        getData();
+        if (props.id) getData();
         initializeForm();
       });
       __expose({
@@ -710,7 +729,7 @@
             }),
             vue.createElementVNode("div", _hoisted_1$1, [
               vue.createVNode(_component_RouterLink, {
-                to: vue.unref(url)("/" + props.backUrl)
+                to: vue.unref(url)(`/${props.backUrl ?? props.url}`)
               }, {
                 default: vue.withCtx(() => [
                   vue.createVNode(_component_el_button, {
@@ -727,7 +746,19 @@
                 ]),
                 _: 1
               }, 8, ["to"]),
-              (vue.openBlock(), vue.createBlock(_component_el_button, {
+              props.id ? (vue.openBlock(), vue.createBlock(_component_el_button, {
+                key: 0,
+                onClick: update,
+                icon: vue.unref(promotion_default),
+                type: "primary",
+                class: "ml-4"
+              }, {
+                default: vue.withCtx(() => _cache[1] || (_cache[1] = [
+                  vue.createTextVNode(" Perbaharui ")
+                ])),
+                _: 1,
+                __: [1]
+              }, 8, ["icon"])) : (vue.openBlock(), vue.createBlock(_component_el_button, {
                 key: 1,
                 onClick: store,
                 icon: vue.unref(promotion_default),

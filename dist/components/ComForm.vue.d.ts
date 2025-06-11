@@ -20,11 +20,13 @@ type __VLS_Props = {
         };
         placeholder?: string;
     }>;
-    fetchUrl: string;
+    id?: number;
+    fetchUrl?: string;
     queries?: Query;
     redirectAfterStoreUrl?: (data: unknown) => string;
     rules?: FormRules;
-    storeUrl: string;
+    storeUrl?: string;
+    url: string;
 };
 declare function initializeForm(): void;
 declare function __VLS_template(): {
