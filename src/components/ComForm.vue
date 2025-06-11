@@ -78,7 +78,10 @@
   function getData() {
     const url = props.fetchUrl ?? props.url;
     httpGet(`${url}/${props.id}?${props.paramsUrl}`)
-      .then((result: ResponseAxios<unknown>) => Object.assign(form, result.data.data))
+      .then((result: ResponseAxios<unknown>) => {
+        Object.assign(form);
+        emits('form', result.data.data);
+      })
       .catch(httpHandleError);
   }
 
@@ -140,7 +143,7 @@
           .then((result: ResponseAxios<unknown>) => {
             if (httpValidation(result)) {
               message(result.data.message, 'success');
-              emits('store', result.data.data);
+              emits('update', result.data.data);
             }
           })
           .catch(httpHandleError);

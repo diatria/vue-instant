@@ -536,7 +536,10 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
     }
     function getData() {
       const url2 = props.fetchUrl ?? props.url;
-      httpGet(`${url2}/${props.id}?${props.paramsUrl}`).then((result) => Object.assign(form, result.data.data)).catch(httpHandleError);
+      httpGet(`${url2}/${props.id}?${props.paramsUrl}`).then((result) => {
+        Object.assign(form);
+        emits("form", result.data.data);
+      }).catch(httpHandleError);
     }
     function initializeForm() {
       props.columns.forEach((column) => {
@@ -584,7 +587,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
           httpPut(`${url2}/${props.id}?${props.paramsUrl}`, form).then((result) => {
             if (httpValidation(result)) {
               message(result.data.message, "success");
-              emits("store", result.data.data);
+              emits("update", result.data.data);
             }
           }).catch(httpHandleError);
         }
