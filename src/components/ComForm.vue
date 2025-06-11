@@ -6,7 +6,7 @@
     httpPut,
     httpValidation,
     message,
-    url,
+    url as helperUrl,
   } from '@/utils/helpers';
   import { Check, Close, Promotion } from '@element-plus/icons-vue';
   import type { FormInstance, FormRules } from 'element-plus';
@@ -46,11 +46,13 @@
       };
       placeholder?: string;
     }>;
-    fetchUrl: string;
+    id?: number;
+    fetchUrl?: string;
     queries?: Query;
     redirectAfterStoreUrl?: (data: unknown) => string;
     rules?: FormRules;
-    storeUrl: string;
+    storeUrl?: string;
+    url: string;
   }>();
 
   const form: Record<string, string | number> = reactive({});
@@ -71,7 +73,8 @@
    */
 
   function getData() {
-    httpGet(props.fetchUrl)
+    const url = props.fetchUrl ?? props.url;
+    httpGet(`${url}/${props.id}`)
       .then((result: ResponseAxios<unknown>) => Object.assign(form, result.data.data))
       .catch(httpHandleError);
   }
@@ -108,9 +111,11 @@
   async function store() {
     // Validation form input
     if (!ruleFormRef.value) return;
+
+    const url = props.storeUrl ?? props.url;
     await ruleFormRef.value.validate(valid => {
       if (valid) {
-        httpPost(props.storeUrl, form)
+        httpPost(url, form)
           .then((result: ResponseAxios<unknown>) => {
             if (httpValidation(result)) {
               message(result.data.message, 'success');
@@ -120,7 +125,7 @@
                 return router.push(props.redirectAfterStoreUrl(result.data.data));
               }
 
-              if (props.backUrl) router.push(`/${props.backUrl}`);
+              router.push(`/${url}`);
             }
           })
           .catch(httpHandleError);
@@ -130,14 +135,16 @@
 
   async function update() {
     if (!ruleFormRef.value) return;
+
+    const url = props.storeUrl ?? props.url;
     await ruleFormRef.value.validate(valid => {
       if (valid) {
-        httpPut(props.storeUrl, form)
+        httpPut(`${url}/${props.id}`, form)
           .then((result: ResponseAxios<unknown>) => {
             if (httpValidation(result)) {
               message(result.data.message, 'success');
               emits('store', result.data.data);
-              if (props.backUrl) router.push(`/${props.backUrl}`);
+              router.push(`/${url}`);
             }
           })
           .catch(httpHandleError);
@@ -150,7 +157,7 @@
   });
 
   onMounted(() => {
-    getData();
+    if (props.id) getData();
     initializeForm();
   });
 
@@ -271,13 +278,13 @@
 
     <div class="flex justify-end border-t border-slate-200 border-solid pt-4">
 
-      <RouterLink :to="url('/' + props.backUrl)">
+      <RouterLink :to="helperUrl(`/${props.backUrl ?? props.url}`)">
 
         <el-button :icon="Close" type="danger" plain>Batal</el-button>
 
       </RouterLink>
 
-      <el-button v-if="false" @click="update" :icon="Promotion" type="primary" class="ml-4">
+      <el-button v-if="props.id" @click="update" :icon="Promotion" type="primary" class="ml-4">
          Perbaharui
       </el-button>
 
