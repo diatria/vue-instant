@@ -23,6 +23,7 @@ interface ComFormProps {
     columns: Column[];
     id?: number;
     fetchUrl?: string;
+    paramsUrl?: string;
     queries?: Query;
     rules?: FormRules;
     storeUrl?: string;

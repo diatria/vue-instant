@@ -517,6 +517,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
     columns: {},
     id: {},
     fetchUrl: {},
+    paramsUrl: {},
     queries: {},
     rules: {},
     storeUrl: {},
@@ -535,7 +536,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
     }
     function getData() {
       const url2 = props.fetchUrl ?? props.url;
-      httpGet(`${url2}/${props.id}`).then((result) => Object.assign(form, result.data.data)).catch(httpHandleError);
+      httpGet(`${url2}/${props.id}?${props.paramsUrl}`).then((result) => Object.assign(form, result.data.data)).catch(httpHandleError);
     }
     function initializeForm() {
       props.columns.forEach((column) => {
@@ -566,7 +567,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
       const url2 = props.storeUrl ?? props.url;
       await ruleFormRef.value.validate((valid) => {
         if (valid) {
-          httpPost(url2, form).then((result) => {
+          httpPost(`${url2}?${props.paramsUrl}`, form).then((result) => {
             if (httpValidation(result)) {
               message(result.data.message, "success");
               emits("store", result.data.data);
@@ -580,7 +581,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
       const url2 = props.storeUrl ?? props.url;
       await ruleFormRef.value.validate((valid) => {
         if (valid) {
-          httpPut(`${url2}/${props.id}`, form).then((result) => {
+          httpPut(`${url2}/${props.id}?${props.paramsUrl}`, form).then((result) => {
             if (httpValidation(result)) {
               message(result.data.message, "success");
               emits("store", result.data.data);

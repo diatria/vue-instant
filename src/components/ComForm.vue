@@ -49,6 +49,7 @@
     columns: Column[];
     id?: number;
     fetchUrl?: string;
+    paramsUrl?: string;
     queries?: Query;
     rules?: FormRules;
     storeUrl?: string;
@@ -76,7 +77,7 @@
 
   function getData() {
     const url = props.fetchUrl ?? props.url;
-    httpGet(`${url}/${props.id}`)
+    httpGet(`${url}/${props.id}?${props.paramsUrl}`)
       .then((result: ResponseAxios<unknown>) => Object.assign(form, result.data.data))
       .catch(httpHandleError);
   }
@@ -117,7 +118,7 @@
     const url = props.storeUrl ?? props.url;
     await ruleFormRef.value.validate(valid => {
       if (valid) {
-        httpPost(url, form)
+        httpPost(`${url}?${props.paramsUrl}`, form)
           .then((result: ResponseAxios<unknown>) => {
             if (httpValidation(result)) {
               message(result.data.message, 'success');
@@ -135,7 +136,7 @@
     const url = props.storeUrl ?? props.url;
     await ruleFormRef.value.validate(valid => {
       if (valid) {
-        httpPut(`${url}/${props.id}`, form)
+        httpPut(`${url}/${props.id}?${props.paramsUrl}`, form)
           .then((result: ResponseAxios<unknown>) => {
             if (httpValidation(result)) {
               message(result.data.message, 'success');
