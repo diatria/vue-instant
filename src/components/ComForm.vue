@@ -79,7 +79,7 @@
     const url = props.fetchUrl ?? props.url;
     httpGet(`${url}/${props.id}?${props.paramsUrl}`)
       .then((result: ResponseAxios<unknown>) => {
-        Object.assign(form);
+        Object.assign(form, result.data.data);
         emits('form', result.data.data);
       })
       .catch(httpHandleError);

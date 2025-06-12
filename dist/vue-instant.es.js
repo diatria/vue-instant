@@ -537,7 +537,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
     function getData() {
       const url2 = props.fetchUrl ?? props.url;
       httpGet(`${url2}/${props.id}?${props.paramsUrl}`).then((result) => {
-        Object.assign(form);
+        Object.assign(form, result.data.data);
         emits("form", result.data.data);
       }).catch(httpHandleError);
     }
