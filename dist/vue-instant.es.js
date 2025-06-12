@@ -523,7 +523,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
     storeUrl: {},
     url: {}
   },
-  emits: ["back", "onStore", "onUpdate", "delete", "form"],
+  emits: ["back", "onStored", "onUpdated", "delete", "form"],
   setup(__props, { expose: __expose, emit: __emit }) {
     const props = __props;
     const emits = __emit;
@@ -573,7 +573,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
           httpPost(`${url2}?${props.paramsUrl}`, form).then((result) => {
             if (httpValidation(result)) {
               message(result.data.message, "success");
-              emits("onStore", result.data.data);
+              emits("onStored", result.data.data);
             }
           }).catch(httpHandleError);
         }
@@ -587,7 +587,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
           httpPut(`${url2}/${props.id}?${props.paramsUrl}`, form).then((result) => {
             if (httpValidation(result)) {
               message(result.data.message, "success");
-              emits("onUpdate", result.data.data);
+              emits("onUpdated", result.data.data);
             }
           }).catch(httpHandleError);
         }

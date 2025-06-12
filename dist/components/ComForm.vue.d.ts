@@ -49,14 +49,14 @@ declare const __VLS_component: import('vue').DefineComponent<ComFormProps, {
     form: (...args: any[]) => void;
     delete: (...args: any[]) => void;
     back: (...args: any[]) => void;
-    onStore: (...args: any[]) => void;
-    onUpdate: (...args: any[]) => void;
+    onStored: (...args: any[]) => void;
+    onUpdated: (...args: any[]) => void;
 }, string, import('vue').PublicProps, Readonly<ComFormProps> & Readonly<{
     onForm?: ((...args: any[]) => any) | undefined;
     onDelete?: ((...args: any[]) => any) | undefined;
     onBack?: ((...args: any[]) => any) | undefined;
-    onOnStore?: ((...args: any[]) => any) | undefined;
-    onOnUpdate?: ((...args: any[]) => any) | undefined;
+    onOnStored?: ((...args: any[]) => any) | undefined;
+    onOnUpdated?: ((...args: any[]) => any) | undefined;
 }>, {}, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {
     ruleFormRef: unknown;
 }, any>;
