@@ -57,7 +57,7 @@
   }
 
   const props = defineProps<ComFormProps>();
-  const emits = defineEmits(['back', 'store', 'update', 'delete', 'form']);
+  const emits = defineEmits(['back', 'onStored', 'onUpdated', 'delete', 'form']);
 
   const form: Record<string, string | number> = reactive({});
   const ruleFormRef = ref<FormInstance>();
@@ -125,7 +125,7 @@
           .then((result: ResponseAxios<unknown>) => {
             if (httpValidation(result)) {
               message(result.data.message, 'success');
-              emits('store', result.data.data);
+              emits('onStored', result.data.data);
             }
           })
           .catch(httpHandleError);
@@ -143,7 +143,7 @@
           .then((result: ResponseAxios<unknown>) => {
             if (httpValidation(result)) {
               message(result.data.message, 'success');
-              emits('update', result.data.data);
+              emits('onUpdated', result.data.data);
             }
           })
           .catch(httpHandleError);
