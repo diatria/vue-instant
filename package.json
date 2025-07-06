@@ -1,6 +1,6 @@
 {
   "name": "vue-instant",
-  "version": "1.0.0",
+  "version": "1.0.0-beta.1",
   "description": "Reusable Vue components and JS helpers to integrate with Laravel Instant",
   "main": "./dist/vue-instant.umd.js",
   "module": "./dist/vue-instant.es.js",

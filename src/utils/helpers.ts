@@ -151,7 +151,7 @@ export function http(baseURL?: string): AxiosInstance {
       Accept: 'application/json',
       Authorization: `Bearer ${getToken()}`,
     },
-    withCredentials: true,
+    withCredentials: getAppConfig().http?.withCredentials ?? true,
   });
 }
 

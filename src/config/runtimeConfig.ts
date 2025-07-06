@@ -2,6 +2,9 @@
 export interface AppConfig {
   apiUrl: string;
   tokenName: string;
+  http?: {
+    withCredentials: boolean
+  }
 }
 
 // Tempat menyimpan config yang akan di-set di main.ts
