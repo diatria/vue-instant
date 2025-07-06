@@ -1,170 +1,209 @@
 <script lang="ts" setup>
-  import type { Query } from '../types';
-  import { httpGet, httpHandleError, replaceString, url } from '../utils/helpers';
-  import { Edit, MoreFilled, View } from '@element-plus/icons-vue';
-  import { onMounted, reactive, ref } from 'vue';
+import type { Query } from '../types'
+import type { RouteLocationRaw } from 'vue-router'
+import { onMounted, reactive, ref } from 'vue'
+import { httpDelete, httpGet, httpHandleError } from '../utils/helpers'
+import { Edit, MoreFilled, View } from '@element-plus/icons-vue'
 
-  const emits = defineEmits(['tableSelections']);
-  const props = defineProps<{
-    apiRelations?: Array<string>;
-    apiColumns?: Array<string>;
-    apiQuery?: Query['queries'];
-    apiOrder?: string;
-    editUrl?: string;
-    fetchUrl: string;
-    removeUrl?: string;
-    tableColumns: Array<{
-      field: string;
-      label: string;
-      value?: unknown;
-      type?: 'slot';
-      width?: string;
-      align?: 'left' | 'center' | 'right';
-    }>;
-    viewUrl?: string;
-  }>();
+const emits = defineEmits(['tableSelections'])
+const props = defineProps<{
+  buttonEditUrl?: (row: { id: number | string }) => RouteLocationRaw
+  buttonViewUrl?: (row: { id: number | string }) => RouteLocationRaw
+  columns: Array<{
+    field: string
+    label: string
+    value?: unknown
+    type?: 'slot'
+    width?: string
+    align?: 'left' | 'center' | 'right'
+  }>
+  setRelations?: Array<string>
+  setColumns?: Array<string>
+  setQueries?: Query['queries']
+  setOrder?: string
+  url: string
+  deleteUrl?: string
+}>()
 
-  const data = ref<Array<unknown>>([]);
-  const totalData = ref(0);
-  const pageSize = ref(10);
-  const currentPage = ref(1);
-  const loading = ref(true);
+const data = ref<Array<unknown>>([])
+const dataSelected = ref<Array<unknown>>([])
+const dialogDeleteConfirmation = ref<boolean>()
+const currentPage = ref(1)
+const loading = ref(true)
+const pageSize = ref(10)
+const totalData = ref(0)
 
-  const state = reactive({
-    data: {},
-    collection: {
-      data: [],
+const state = reactive({
+  data: {},
+  collection: {
+    data: [],
+  },
+})
+
+// Methods
+function changePage() {
+  fetchingDataFromServer()
+}
+
+function fetchingDataFromServer() {
+  loading.value = true
+  httpGet(props.url, {
+    params: {
+      relations: props.setRelations,
+      columns: props.setColumns,
+      pagination_length: pageSize.value,
+      page: currentPage.value,
+      queries: props.setQueries,
+      order: props.setOrder,
     },
-  });
+  })
+    .then((result) => {
+      loading.value = false
+      data.value = result.data.data.data
+      totalData.value = result.data.data.total
 
-  // Methods
-  function changePage() {
-    fetchingDataFromServer();
-  }
-
-  function fetchingDataFromServer() {
-    loading.value = true;
-    let url = props.fetchUrl;
-    if (!/https?:\/\//i.test(props.fetchUrl)) {
-      url = `${import.meta.env.VITE_API_URL}/${props.fetchUrl}`;
-    }
-    httpGet(url, {
-      params: {
-        relations: props.apiRelations,
-        columns: props.apiColumns,
-        pagination_length: pageSize.value,
-        page: currentPage.value,
-        queries: props.apiQuery,
-        order: props.apiOrder,
-      },
+      state.collection = result.data.data
     })
-      .then(result => {
-        loading.value = false;
-        data.value = result.data.data.data;
-        totalData.value = result.data.data.total;
+    .catch((error) => {
+      loading.value = false
+      httpHandleError(error)
+    })
+}
 
-        state.collection = result.data.data;
-      })
-      .catch(error => {
-        loading.value = false;
-        httpHandleError(error);
-      });
+function handleSelectionChange(val: Array<{ id: number | string }>) {
+  dataSelected.value = val
+  emits(
+    'tableSelections',
+    val.map((item) => item.id),
+  )
+}
+
+function refresh() {
+  fetchingDataFromServer()
+}
+
+function remove() {
+  if (!props.deleteUrl) {
+    throw new Error(`Props 'delete-url' belum di inisialisasi`)
   }
 
-  function handleSelectionChange(val: Array<{ id: unknown }>) {
-    emits(
-      'tableSelections',
-      val.map(item => item.id)
-    );
+  if (!dialogDeleteConfirmation.value) {
+    dialogDeleteConfirmation.value = true
+    return
   }
 
-  function refresh() {
-    fetchingDataFromServer();
-  }
+  const ids = dataSelected.value.map((item) => {
+    return (item as { id: number | string }).id
+  })
+  httpDelete(`${props.deleteUrl}`, {
+    data: {
+      id: ids,
+    },
+  })
+    .then((result) => {
+      refresh()
+      dialogDeleteConfirmation.value = false
+    })
+    .catch(httpHandleError)
+}
 
-  onMounted(() => {
-    fetchingDataFromServer();
-  });
+onMounted(() => {
+  fetchingDataFromServer()
+})
 
-  defineExpose({ refresh });
+defineExpose({ refresh, remove })
 </script>
 
 <template>
-
   <div>
-     <el-table
+    <!-- Toolbar -->
+    <div class="flex justify-end">
+      <el-button v-if="!$slots.buttonDelete" @click="dialogDeleteConfirmation = true" type="danger"
+        >Hapus</el-button
+      >
+      <slot name="buttonDelete"></slot>
+      <el-button>Filter</el-button>
+    </div>
+
+    <!-- Table -->
+    <el-table
       v-loading="loading"
       :data="data"
       @selection-change="handleSelectionChange"
       style="width: 100%"
-      > <el-table-column type="selection" width="55" fixed="left" /> <template
-        v-for="(column, index) of props.tableColumns"
-        :key="index"
-        > <el-table-column
+    >
+      <el-table-column type="selection" width="55" fixed="left" />
+      <template v-for="(column, index) of props.columns" :key="index">
+        <el-table-column
           v-if="!column.value && column.type !== 'slot'"
           :prop="column.field"
           :label="column.label"
           :width="column.width"
           :align="column.align ?? 'left'"
-        /> <!-- Custom value --> <el-table-column
+        />
+        <!-- Custom value -->
+        <el-table-column
           v-if="column.value && column.type !== 'slot'"
           :prop="column.field"
           :label="column.label"
           :width="column.width"
           :align="column.align ?? 'left'"
-          > <template #default="scope">{{
+        >
+          <template #default="scope">{{
             typeof column.value === 'function' ? column.value(scope.row) : ''
-          }}</template
-          > </el-table-column
-        > <!-- Slot --> <el-table-column
+          }}</template>
+        </el-table-column>
+        <!-- Slot -->
+        <el-table-column
           v-if="column.type === 'slot'"
           :prop="column.field"
           :label="column.label"
           :width="column.width"
           :align="column.align ?? 'left'"
-          > <template #default="scope"><slot :name="column.field" :row="scope.row" /></template>
-          </el-table-column
-        > </template
-      > <el-table-column width="55" fixed="right"
-        > <template #default="scope"
-          >
+        >
+          <template #default="scope"><slot :name="column.field" :row="scope.row" /></template>
+        </el-table-column>
+      </template>
+      <el-table-column width="55" fixed="right">
+        <template #default="scope">
           <div
             class="hover:cursor-pointer hover:bg-slate-200 justify-center rounded flex items-center"
           >
-             <el-popover placement="bottom" :width="150" popper-class="!p-0" trigger="click"
-              > <template #reference
-                > <el-icon><MoreFilled /></el-icon> </template
-              >
+            <el-popover placement="bottom" :width="150" popper-class="!p-0" trigger="click">
+              <template #reference>
+                <el-icon><MoreFilled /></el-icon>
+              </template>
               <ul>
-                 <!-- Action Button View --> <RouterLink
-                  v-if="props.viewUrl"
-                  :to="url('/' + replaceString(props.viewUrl, scope.row))"
+                <!-- Action Button View -->
+                <RouterLink
+                  v-if="typeof buttonViewUrl === 'function'"
+                  :to="buttonViewUrl(scope.row)"
                   target="_blank"
-                  >
-                  <li class="flex items-center py-2 px-4 hover:cursor-pointer hover:bg-slate-100">
-                     <el-icon><View /></el-icon> <span class="ml-2">Lihat</span>
-                  </li>
-                   </RouterLink
-                > <!-- Action Button Edit --> <RouterLink
-                  v-if="props.editUrl"
-                  :to="url('/' + replaceString(props.editUrl ?? '', scope.row))"
-                  >
-                  <li class="flex items-center py-2 px-4 hover:cursor-pointer hover:bg-slate-100">
-                     <el-icon><Edit /></el-icon> <span class="ml-2">Ubah</span>
-                  </li>
-                   </RouterLink
-                > <slot name="action" :row="scope.row"></slot
                 >
+                  <li class="flex items-center py-2 px-4 hover:cursor-pointer hover:bg-slate-100">
+                    <el-icon><View /></el-icon> <span class="ml-2">Lihat</span>
+                  </li>
+                </RouterLink>
+                <!-- Action Button Edit -->
+                <RouterLink
+                  v-if="typeof buttonEditUrl === 'function'"
+                  :to="buttonEditUrl(scope.row)"
+                >
+                  <li class="flex items-center py-2 px-4 hover:cursor-pointer hover:bg-slate-100">
+                    <el-icon><Edit /></el-icon> <span class="ml-2">Ubah</span>
+                  </li>
+                </RouterLink>
+                <slot name="action" :row="scope.row"></slot>
               </ul>
-               </el-popover
-            >
+            </el-popover>
           </div>
-           </template
-        > </el-table-column
-      > </el-table
-    >
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <!-- Pagination -->
     <div class="flex justify-end mt-4">
-       <el-pagination
+      <el-pagination
         v-model:page-size="pageSize"
         v-model:current-page="currentPage"
         :total="totalData"
@@ -174,7 +213,15 @@
       />
     </div>
 
+    <!-- Dialog delete confirmation -->
+    <el-dialog v-model="dialogDeleteConfirmation" title="Konfirmasi" width="500">
+      <span>Anda yakin ingin menghapus data yang Anda pilih ?</span>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="dialogDeleteConfirmation = false">Cancel</el-button>
+          <el-button type="primary" @click="remove"> Confirm </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
-
 </template>
-
