@@ -6,7 +6,7 @@
     httpPut,
     httpValidation,
     message,
-  } from '@/utils/helpers';
+  } from '../utils/helpers';
   import { Check, Close, Promotion } from '@element-plus/icons-vue';
   import type { FormInstance, FormRules } from 'element-plus';
   import { onBeforeMount, onMounted, reactive, ref } from 'vue';

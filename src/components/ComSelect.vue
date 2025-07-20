@@ -1,8 +1,7 @@
 <script lang="ts" setup>
-  import { httpGet } from '@/utils/helpers';
   import { get } from 'lodash';
   import { computed, onMounted, ref } from 'vue';
-  import { httpHandleError } from '@/utils/helpers';
+  import { httpHandleError, httpGet } from '../utils/helpers';
 
   const emit = defineEmits(['update:modelValue']);
 

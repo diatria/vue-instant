@@ -1,7 +1,6 @@
 // Struktur config yang kamu butuhkan
 export interface AppConfig {
-  apiUrl: string;
-  tokenName: string;
+  token_name: string
   http?: {
     withCredentials: boolean
   }
@@ -15,6 +14,5 @@ export function setAppConfig(cfg: AppConfig) {
 }
 
 export function getAppConfig(): AppConfig {
-  if (!config) throw new Error('App config is not initialized');
   return config;
 }

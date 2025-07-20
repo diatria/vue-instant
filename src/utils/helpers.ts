@@ -91,13 +91,19 @@ export function getInitials(name: string): string {
 }
 
 export function getRefreshToken(): string {
-  const tokenName = getAppConfig().tokenName;
+  const tokenName = import.meta.env.VITE_DS_VUE_INSTANT_TOKEN_NAME
+  if (!tokenName && !getAppConfig()) {
+    throw new Error('Token name cannot be empty');
+  }
   const snakeCaseTokenName = snakeCase(tokenName);
   return localStorage.getItem(`${snakeCaseTokenName}_refresh_token`) ?? '';
 }
 
 export function getToken() {
-  const tokenName = getAppConfig().tokenName;
+  const tokenName = import.meta.env.VITE_DS_VUE_INSTANT_TOKEN_NAME
+  if (!tokenName && !getAppConfig()) {
+    throw new Error('Token name cannot be empty');
+  }
   return localStorage.getItem(`access_token_${tokenName}`) ?? '';
 }
 
@@ -138,26 +144,25 @@ export function httpValidation(response: AxiosResponse): boolean {
   return false;
 }
 
-export function http(baseURL?: string): AxiosInstance {
-  const containHttp = baseURL?.includes('http://');
-  const containHttps = baseURL?.includes('https://');
+export function http(): AxiosInstance {
+  let withCredentials = import.meta.env.VITE_DS_VUE_INSTANT_HTTP_WITH_TOKEN
+  if (!withCredentials && getAppConfig()) {
+    withCredentials = getAppConfig().http?.withCredentials
+  }
 
-  let baseUrl = getAppConfig().apiUrl;
-  if (containHttp || containHttps) baseUrl = baseURL as string;
   return axios.create({
-    baseURL: baseUrl,
     timeout: 60000,
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${getToken()}`,
     },
-    withCredentials: getAppConfig().http?.withCredentials ?? true,
+    withCredentials: withCredentials ?? true,
   });
 }
 
 export function httpGet(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse> {
   return new Promise((resolve, reject) => {
-    http(url)
+    http()
       .get(url, config)
       .then(result => resolve(result))
       .catch(error => {
@@ -175,7 +180,7 @@ export function httpPost(
   config?: AxiosRequestConfig
 ): Promise<AxiosResponse> {
   return new Promise((resolve, reject) => {
-    http(url)
+    http()
       .post(url, data, config)
       .then(result => resolve(result))
       .catch(error => {
