@@ -91,7 +91,7 @@ export function getInitials(name: string): string {
 }
 
 export function getRefreshToken(): string {
-  const tokenName = import.meta.env.VITE_DS_VUE_INSTANT_TOKEN_NAME
+  const tokenName = import.meta.env.VITE_DS_VUE_INSTANT_TOKEN_NAME;
   if (!tokenName && !getAppConfig()) {
     throw new Error('Token name cannot be empty');
   }
@@ -100,7 +100,7 @@ export function getRefreshToken(): string {
 }
 
 export function getToken() {
-  const tokenName = import.meta.env.VITE_DS_VUE_INSTANT_TOKEN_NAME
+  const tokenName = import.meta.env.VITE_DS_VUE_INSTANT_TOKEN_NAME;
   if (!tokenName && !getAppConfig()) {
     throw new Error('Token name cannot be empty');
   }
@@ -145,9 +145,9 @@ export function httpValidation(response: AxiosResponse): boolean {
 }
 
 export function http(): AxiosInstance {
-  let withCredentials = import.meta.env.VITE_DS_VUE_INSTANT_HTTP_WITH_TOKEN
+  let withCredentials = import.meta.env.VITE_DS_VUE_INSTANT_HTTP_WITH_TOKEN;
   if (!withCredentials && getAppConfig()) {
-    withCredentials = getAppConfig().http?.withCredentials
+    withCredentials = getAppConfig().http?.withCredentials;
   }
 
   return axios.create({
@@ -279,7 +279,7 @@ export function pascalCase(text: string) {
 
 // # Index R
 export function removeRefreshToken() {
-  const tokenName = snakeCase(getAppConfig().tokenName);
+  const tokenName = snakeCase(getAppConfig().token_name);
   localStorage.removeItem(`${tokenName}_refresh_token`);
 }
 
@@ -314,7 +314,7 @@ export function routeParam(key: string): string | null {
 
 // # S
 export function setRefreshToken(token: string) {
-  const tokenName = snakeCase(getAppConfig().tokenName);
+  const tokenName = snakeCase(getAppConfig().token_name);
   localStorage.setItem(`${tokenName}_refresh_token`, token);
 }
 
