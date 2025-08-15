@@ -8,8 +8,9 @@
   const props = defineProps<{
     disabled?: boolean;
     fetchOnClick?: boolean;
-    fieldLabel?: string;
+    fieldLabel?: string | ((row: any) => any);
     fieldValue?: string;
+    fieldSearchColumn?: string;
     options?: Array<unknown>;
     placeholder?: string;
     remote?: boolean;
@@ -22,8 +23,13 @@
 
   const fieldLabel = computed(() => props.fieldLabel ?? 'name');
   const fieldValue = computed(() => props.fieldValue ?? 'id');
+  const fieldSearchColumn = computed(() => props.fieldSearchColumn ?? fieldLabel.value);
 
   // Methods
+  function changeCollection(values: Record<string, never>[]) {
+    collections.value = values;
+  }
+
   function fetchingDataFromServer(search?: string) {
     fetchLoading.value = true;
 
@@ -34,7 +40,7 @@
     if (!search && props.remote) return;
     if (props.remote && search) {
       params = {
-        queries: [{ field: fieldLabel.value, value: search }],
+        queries: [{ field: fieldSearchColumn.value, value: search }],
       };
     }
 
@@ -57,6 +63,7 @@
   });
 
   defineExpose({
+    changeCollection,
     fetchingDataFromServer,
   });
 </script>
@@ -77,10 +84,19 @@
   >
 
     <el-option
+      v-if="typeof fieldLabel === 'string'"
       v-for="item in collections"
       :key="item[fieldValue]"
-      :label="get(item, fieldLabel)"
-      :value="item[fieldValue] ?? item['id']"
+      :label="get(item, fieldLabel ?? 'name')"
+      :value="get(item, fieldValue ?? 'id')"
+    />
+
+    <el-option
+      v-if="typeof fieldLabel === 'function'"
+      v-for="item in collections"
+      :key="item[fieldValue]"
+      :label="fieldLabel(item)"
+      :value="get(item, fieldValue ?? 'id')"
     />
 
   </el-select>

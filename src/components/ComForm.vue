@@ -17,8 +17,9 @@
   type ColumnSelect = {
     options?: Array<unknown>;
     url?: string;
-    field_label?: string;
+    field_label?: string | ((row: any) => any);
     field_value?: string;
+    field_search_column?: string;
     fetch_on_click?: boolean;
     remote?: boolean;
   };
@@ -51,6 +52,7 @@
     fetchUrl?: string;
     paramsUrl?: string;
     queries?: Query;
+    relations?: any[];
     rules?: FormRules;
     storeUrl?: string;
     url: string;
@@ -77,7 +79,12 @@
 
   function getData() {
     const url = props.fetchUrl ?? props.url;
-    httpGet(`${url}/${props.id}?${props.paramsUrl}`)
+    httpGet(`${url}/${props.id}`, {
+      params: {
+        queries: props.queries,
+        relations: props.relations,
+      },
+    })
       .then((result: ResponseAxios<unknown>) => {
         Object.assign(form, result.data.data);
         emits('form', result.data.data);
@@ -223,6 +230,7 @@
               :fetch-on-click="column.select?.fetch_on_click"
               :field-label="column.select?.field_label ?? 'name'"
               :field-value="column.select?.field_value ?? 'id'"
+              :field-search-column="column.select?.field_search_column"
               :options="column.select?.options"
               :placeholder="column.placeholder"
               :remote="column.select?.remote"
