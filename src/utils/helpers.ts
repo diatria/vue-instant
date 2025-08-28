@@ -22,7 +22,7 @@ export function beautyDateTime(date: string) {
 }
 
 // # INDEX C
-export function csl(data: any, label?: string) {
+export function csl(data: unknown, label?: string) {
   if (label) console.log(label, data);
   else console.log(data);
 }
@@ -176,7 +176,7 @@ export function httpGet(url: string, config?: AxiosRequestConfig): Promise<Axios
 
 export function httpPost(
   url: string,
-  data?: any,
+  data?: unknown,
   config?: AxiosRequestConfig
 ): Promise<AxiosResponse> {
   return new Promise((resolve, reject) => {
@@ -208,7 +208,7 @@ export function httpDelete(url: string, config?: AxiosRequestConfig): Promise<Ax
 
 export function httpPut(
   url: string,
-  data?: any,
+  data?: unknown,
   config?: AxiosRequestConfig
 ): Promise<AxiosResponse> {
   return new Promise((resolve, reject) => {
@@ -283,7 +283,7 @@ export function removeRefreshToken() {
   localStorage.removeItem(`${tokenName}_refresh_token`);
 }
 
-export function replaceString(text: string, data: any) {
+export function replaceString(text: string, data: Record<string, unknown>) {
   if (!data) return text;
 
   // Ekspresi reguler untuk mencari "{params}"
@@ -297,7 +297,7 @@ export function replaceString(text: string, data: any) {
 
   let finalText = text;
   matches.forEach(item => {
-    finalText = finalText.replace(`{${item}}`, data[item]);
+    finalText = finalText.replace(`{${item}}`, String((data as Record<string, unknown>)[item]));
   });
 
   return finalText ?? '';
@@ -337,7 +337,7 @@ export function titleCase(text: string) {
 }
 
 // # Index W
-export function waiting(fn: Function, delay: number | null = 500) {
+export function waiting<T>(fn: () => T, delay: number | null = 500): Promise<T> {
   return new Promise(resolve => {
     setTimeout(() => {
       resolve(fn());
