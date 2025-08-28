@@ -3,8 +3,9 @@ import { Query } from '../types';
 type ColumnSelect = {
     options?: Array<unknown>;
     url?: string;
-    field_label?: string;
+    field_label?: string | ((row: any) => any);
     field_value?: string;
+    field_search_column?: string;
     fetch_on_click?: boolean;
     remote?: boolean;
 };
@@ -25,6 +26,7 @@ interface ComFormProps {
     fetchUrl?: string;
     paramsUrl?: string;
     queries?: Query;
+    relations?: any[];
     rules?: FormRules;
     storeUrl?: string;
     url: string;

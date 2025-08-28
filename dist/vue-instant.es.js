@@ -1,8 +1,8 @@
-import { createElementBlock, openBlock, renderSlot, defineComponent, mergeModels, useModel, resolveComponent, createBlock, withCtx, createElementVNode, createTextVNode, toDisplayString, createVNode, inject, ref, computed, onMounted, Fragment, renderList, unref, reactive, onBeforeMount, createCommentVNode, resolveDirective, withDirectives } from "vue";
+import { createElementBlock, openBlock, renderSlot, defineComponent, mergeModels, useModel, resolveComponent, createBlock, withCtx, createElementVNode, createTextVNode, toDisplayString, createVNode, inject, ref, computed, onMounted, createCommentVNode, Fragment, renderList, unref, reactive, onBeforeMount, resolveDirective, withDirectives } from "vue";
 import axios from "axios";
 import dayjs from "dayjs";
 import { ElMessage } from "element-plus";
-import { snakeCase, startCase, kebabCase, get } from "lodash";
+import { startCase, snakeCase, kebabCase, get } from "lodash";
 const _export_sfc = (sfc, props) => {
   const target = sfc.__vccOpts || sfc;
   for (const [key, val] of props) {
@@ -80,7 +80,6 @@ function setAppConfig(cfg) {
   config = cfg;
 }
 function getAppConfig() {
-  if (!config) throw new Error("App config is not initialized");
   return config;
 }
 /*!
@@ -172,12 +171,18 @@ function getInitials(name) {
   return name.split(" ").map((word) => word[0]).join("").toUpperCase();
 }
 function getRefreshToken() {
-  const tokenName = getAppConfig().tokenName;
+  const tokenName = void 0;
+  if (!getAppConfig()) {
+    throw new Error("Token name cannot be empty");
+  }
   const snakeCaseTokenName = snakeCase(tokenName);
   return localStorage.getItem(`${snakeCaseTokenName}_refresh_token`) ?? "";
 }
 function getToken() {
-  const tokenName = getAppConfig().tokenName;
+  const tokenName = void 0;
+  if (!getAppConfig()) {
+    throw new Error("Token name cannot be empty");
+  }
   return localStorage.getItem(`access_token_${tokenName}`) ?? "";
 }
 function httpHandleError(error) {
@@ -212,31 +217,31 @@ function httpValidation(response) {
   if (found) return found.type === "success";
   return false;
 }
-function http(baseURL) {
-  const containHttp = baseURL == null ? void 0 : baseURL.includes("http://");
-  const containHttps = baseURL == null ? void 0 : baseURL.includes("https://");
-  let baseUrl = getAppConfig().apiUrl;
-  if (containHttp || containHttps) baseUrl = baseURL;
+function http() {
+  var _a;
+  let withCredentials = void 0;
+  if (!withCredentials && getAppConfig()) {
+    withCredentials = (_a = getAppConfig().http) == null ? void 0 : _a.withCredentials;
+  }
   return axios.create({
-    baseURL: baseUrl,
     timeout: 6e4,
     headers: {
       Accept: "application/json",
       Authorization: `Bearer ${getToken()}`
     },
-    withCredentials: true
+    withCredentials: withCredentials ?? true
   });
 }
 function httpGet(url2, config2) {
   return new Promise((resolve, reject) => {
-    http(url2).get(url2, config2).then((result) => resolve(result)).catch((error) => {
+    http().get(url2, config2).then((result) => resolve(result)).catch((error) => {
       reject(error);
     });
   });
 }
 function httpPost(url2, data, config2) {
   return new Promise((resolve, reject) => {
-    http(url2).post(url2, data, config2).then((result) => resolve(result)).catch((error) => {
+    http().post(url2, data, config2).then((result) => resolve(result)).catch((error) => {
       reject(error);
     });
   });
@@ -289,7 +294,7 @@ function pascalCase(text) {
   return startCase(text);
 }
 function removeRefreshToken() {
-  const tokenName = snakeCase(getAppConfig().tokenName);
+  const tokenName = snakeCase(getAppConfig().token_name);
   localStorage.removeItem(`${tokenName}_refresh_token`);
 }
 function replaceString(text, data) {
@@ -302,7 +307,7 @@ function replaceString(text, data) {
   }
   let finalText = text;
   matches.forEach((item) => {
-    finalText = finalText.replace(`{${item}}`, data[item]);
+    finalText = finalText.replace(`{${item}}`, String(data[item]));
   });
   return finalText ?? "";
 }
@@ -312,7 +317,7 @@ function routeParam(key) {
   return ((_a = route.params[key]) == null ? void 0 : _a.toString()) || null;
 }
 function setRefreshToken(token) {
-  const tokenName = snakeCase(getAppConfig().tokenName);
+  const tokenName = snakeCase(getAppConfig().token_name);
   localStorage.setItem(`${tokenName}_refresh_token`, token);
 }
 function url(text) {
@@ -439,8 +444,9 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
   props: {
     disabled: { type: Boolean },
     fetchOnClick: { type: Boolean },
-    fieldLabel: {},
+    fieldLabel: { type: [String, Function] },
     fieldValue: {},
+    fieldSearchColumn: {},
     options: {},
     placeholder: {},
     remote: { type: Boolean },
@@ -455,6 +461,10 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
     const value = ref("");
     const fieldLabel = computed(() => props.fieldLabel ?? "name");
     const fieldValue = computed(() => props.fieldValue ?? "id");
+    const fieldSearchColumn = computed(() => props.fieldSearchColumn ?? fieldLabel.value);
+    function changeCollection(values) {
+      collections.value = values;
+    }
     function fetchingDataFromServer(search) {
       fetchLoading.value = true;
       if (!props.url) throw new Error("URL belum terdefinisi saat fetch Select");
@@ -462,7 +472,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
       if (!search && props.remote) return;
       if (props.remote && search) {
         params = {
-          queries: [{ field: fieldLabel.value, value: search }]
+          queries: [{ field: fieldSearchColumn.value, value: search }]
         };
       }
       httpGet(props.url, {
@@ -480,6 +490,7 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
       if (props.options) collections.value = props.options;
     });
     __expose({
+      changeCollection,
       fetchingDataFromServer
     });
     return (_ctx, _cache) => {
@@ -497,13 +508,20 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
         filterable: ""
       }, {
         default: withCtx(() => [
-          (openBlock(true), createElementBlock(Fragment, null, renderList(collections.value, (item) => {
+          typeof fieldLabel.value === "string" ? (openBlock(true), createElementBlock(Fragment, { key: 0 }, renderList(collections.value, (item) => {
             return openBlock(), createBlock(_component_el_option, {
               key: item[fieldValue.value],
-              label: unref(get)(item, fieldLabel.value),
-              value: item[fieldValue.value] ?? item["id"]
+              label: unref(get)(item, fieldLabel.value ?? "name"),
+              value: unref(get)(item, fieldValue.value ?? "id")
             }, null, 8, ["label", "value"]);
-          }), 128))
+          }), 128)) : createCommentVNode("", true),
+          typeof fieldLabel.value === "function" ? (openBlock(true), createElementBlock(Fragment, { key: 1 }, renderList(collections.value, (item) => {
+            return openBlock(), createBlock(_component_el_option, {
+              key: item[fieldValue.value],
+              label: fieldLabel.value(item),
+              value: unref(get)(item, fieldValue.value ?? "id")
+            }, null, 8, ["label", "value"]);
+          }), 128)) : createCommentVNode("", true)
         ]),
         _: 1
       }, 8, ["modelValue", "disabled", "remote", "loading", "placeholder"]);
@@ -519,6 +537,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
     fetchUrl: {},
     paramsUrl: {},
     queries: {},
+    relations: {},
     rules: {},
     storeUrl: {},
     url: {}
@@ -536,7 +555,12 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
     }
     function getData() {
       const url2 = props.fetchUrl ?? props.url;
-      httpGet(`${url2}/${props.id}?${props.paramsUrl}`).then((result) => {
+      httpGet(`${url2}/${props.id}`, {
+        params: {
+          queries: props.queries,
+          relations: props.relations
+        }
+      }).then((result) => {
         Object.assign(form, result.data.data);
         emits("form", result.data.data);
       }).catch(httpHandleError);
@@ -641,7 +665,7 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                         prop: column.name
                       }, {
                         default: withCtx(() => {
-                          var _a, _b, _c, _d, _e, _f;
+                          var _a, _b, _c, _d, _e, _f, _g;
                           return [
                             column.type === "text" ? (openBlock(), createBlock(_component_el_input, {
                               key: 0,
@@ -666,12 +690,13 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
                               "fetch-on-click": (_a = column.select) == null ? void 0 : _a.fetch_on_click,
                               "field-label": ((_b = column.select) == null ? void 0 : _b.field_label) ?? "name",
                               "field-value": ((_c = column.select) == null ? void 0 : _c.field_value) ?? "id",
-                              options: (_d = column.select) == null ? void 0 : _d.options,
+                              "field-search-column": (_d = column.select) == null ? void 0 : _d.field_search_column,
+                              options: (_e = column.select) == null ? void 0 : _e.options,
                               placeholder: column.placeholder,
-                              remote: (_e = column.select) == null ? void 0 : _e.remote,
-                              url: (_f = column.select) == null ? void 0 : _f.url,
+                              remote: (_f = column.select) == null ? void 0 : _f.remote,
+                              url: (_g = column.select) == null ? void 0 : _g.url,
                               onChange
-                            }, null, 8, ["modelValue", "onUpdate:modelValue", "disabled", "fetch-on-click", "field-label", "field-value", "options", "placeholder", "remote", "url"])) : createCommentVNode("", true),
+                            }, null, 8, ["modelValue", "onUpdate:modelValue", "disabled", "fetch-on-click", "field-label", "field-value", "field-search-column", "options", "placeholder", "remote", "url"])) : createCommentVNode("", true),
                             column.type === "password" ? (openBlock(), createBlock(_component_el_input, {
                               key: 3,
                               modelValue: form[column.name],
@@ -768,32 +793,36 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
     };
   }
 });
-const _hoisted_1 = { class: "hover:cursor-pointer hover:bg-slate-200 justify-center rounded flex items-center" };
-const _hoisted_2 = { class: "flex items-center py-2 px-4 hover:cursor-pointer hover:bg-slate-100" };
+const _hoisted_1 = { class: "flex justify-end" };
+const _hoisted_2 = { class: "hover:cursor-pointer hover:bg-slate-200 justify-center rounded flex items-center" };
 const _hoisted_3 = { class: "flex items-center py-2 px-4 hover:cursor-pointer hover:bg-slate-100" };
-const _hoisted_4 = { class: "flex justify-end mt-4" };
+const _hoisted_4 = { class: "flex items-center py-2 px-4 hover:cursor-pointer hover:bg-slate-100" };
+const _hoisted_5 = { class: "flex justify-end mt-4" };
+const _hoisted_6 = { class: "dialog-footer" };
 const _sfc_main = /* @__PURE__ */ defineComponent({
   __name: "ComTable",
   props: {
-    apiRelations: {},
-    apiColumns: {},
-    apiQuery: {},
-    apiOrder: {},
-    editUrl: {},
-    fetchUrl: {},
-    removeUrl: {},
-    tableColumns: {},
-    viewUrl: {}
+    buttonEditUrl: { type: Function },
+    buttonViewUrl: { type: Function },
+    columns: {},
+    setRelations: {},
+    setColumns: {},
+    setQueries: {},
+    setOrder: {},
+    url: {},
+    deleteUrl: {}
   },
   emits: ["tableSelections"],
   setup(__props, { expose: __expose, emit: __emit }) {
     const emits = __emit;
     const props = __props;
     const data = ref([]);
-    const totalData = ref(0);
-    const pageSize = ref(10);
+    const dataSelected = ref([]);
+    const dialogDeleteConfirmation = ref();
     const currentPage = ref(1);
     const loading = ref(true);
+    const pageSize = ref(10);
+    const totalData = ref(0);
     const state = reactive({
       data: {},
       collection: {
@@ -805,18 +834,14 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     }
     function fetchingDataFromServer() {
       loading.value = true;
-      let url2 = props.fetchUrl;
-      if (!/https?:\/\//i.test(props.fetchUrl)) {
-        url2 = `${void 0}/${props.fetchUrl}`;
-      }
-      httpGet(url2, {
+      httpGet(props.url, {
         params: {
-          relations: props.apiRelations,
-          columns: props.apiColumns,
+          relations: props.setRelations,
+          columns: props.setColumns,
           pagination_length: pageSize.value,
           page: currentPage.value,
-          queries: props.apiQuery,
-          order: props.apiOrder
+          queries: props.setQueries,
+          order: props.setOrder
         }
       }).then((result) => {
         loading.value = false;
@@ -829,6 +854,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       });
     }
     function handleSelectionChange(val) {
+      dataSelected.value = val;
       emits(
         "tableSelections",
         val.map((item) => item.id)
@@ -837,19 +863,62 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     function refresh() {
       fetchingDataFromServer();
     }
+    function remove() {
+      if (!props.deleteUrl) {
+        throw new Error(`Props 'delete-url' belum di inisialisasi`);
+      }
+      if (!dialogDeleteConfirmation.value) {
+        dialogDeleteConfirmation.value = true;
+        return;
+      }
+      const ids = dataSelected.value.map((item) => {
+        return item.id;
+      });
+      httpDelete(`${props.deleteUrl}`, {
+        data: {
+          id: ids
+        }
+      }).then((result) => {
+        refresh();
+        dialogDeleteConfirmation.value = false;
+      }).catch(httpHandleError);
+    }
     onMounted(() => {
       fetchingDataFromServer();
     });
-    __expose({ refresh });
+    __expose({ refresh, remove });
     return (_ctx, _cache) => {
+      const _component_el_button = resolveComponent("el-button");
       const _component_el_table_column = resolveComponent("el-table-column");
       const _component_el_icon = resolveComponent("el-icon");
       const _component_RouterLink = resolveComponent("RouterLink");
       const _component_el_popover = resolveComponent("el-popover");
       const _component_el_table = resolveComponent("el-table");
       const _component_el_pagination = resolveComponent("el-pagination");
+      const _component_el_dialog = resolveComponent("el-dialog");
       const _directive_loading = resolveDirective("loading");
       return openBlock(), createElementBlock("div", null, [
+        createElementVNode("div", _hoisted_1, [
+          !_ctx.$slots.buttonDelete ? (openBlock(), createBlock(_component_el_button, {
+            key: 0,
+            onClick: _cache[0] || (_cache[0] = ($event) => dialogDeleteConfirmation.value = true),
+            type: "danger"
+          }, {
+            default: withCtx(() => _cache[5] || (_cache[5] = [
+              createTextVNode("Hapus")
+            ])),
+            _: 1,
+            __: [5]
+          })) : createCommentVNode("", true),
+          renderSlot(_ctx.$slots, "buttonDelete"),
+          createVNode(_component_el_button, null, {
+            default: withCtx(() => _cache[6] || (_cache[6] = [
+              createTextVNode("Filter")
+            ])),
+            _: 1,
+            __: [6]
+          })
+        ]),
         withDirectives((openBlock(), createBlock(_component_el_table, {
           data: data.value,
           onSelectionChange: handleSelectionChange,
@@ -861,8 +930,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               width: "55",
               fixed: "left"
             }),
-            _cache[10] || (_cache[10] = createTextVNode()),
-            (openBlock(true), createElementBlock(Fragment, null, renderList(props.tableColumns, (column, index) => {
+            (openBlock(true), createElementBlock(Fragment, null, renderList(props.columns, (column, index) => {
               return openBlock(), createElementBlock(Fragment, { key: index }, [
                 !column.value && column.type !== "slot" ? (openBlock(), createBlock(_component_el_table_column, {
                   key: 0,
@@ -871,7 +939,6 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   width: column.width,
                   align: column.align ?? "left"
                 }, null, 8, ["prop", "label", "width", "align"])) : createCommentVNode("", true),
-                _cache[2] || (_cache[2] = createTextVNode()),
                 column.value && column.type !== "slot" ? (openBlock(), createBlock(_component_el_table_column, {
                   key: 1,
                   prop: column.field,
@@ -884,7 +951,6 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   ]),
                   _: 2
                 }, 1032, ["prop", "label", "width", "align"])) : createCommentVNode("", true),
-                _cache[3] || (_cache[3] = createTextVNode()),
                 column.type === "slot" ? (openBlock(), createBlock(_component_el_table_column, {
                   key: 2,
                   prop: column.field,
@@ -901,13 +967,12 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 }, 1032, ["prop", "label", "width", "align"])) : createCommentVNode("", true)
               ], 64);
             }), 128)),
-            _cache[11] || (_cache[11] = createTextVNode()),
             createVNode(_component_el_table_column, {
               width: "55",
               fixed: "right"
             }, {
               default: withCtx((scope) => [
-                createElementVNode("div", _hoisted_1, [
+                createElementVNode("div", _hoisted_2, [
                   createVNode(_component_el_popover, {
                     placement: "bottom",
                     width: 150,
@@ -924,45 +989,43 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                     ]),
                     default: withCtx(() => [
                       createElementVNode("ul", null, [
-                        props.viewUrl ? (openBlock(), createBlock(_component_RouterLink, {
+                        typeof _ctx.buttonViewUrl === "function" ? (openBlock(), createBlock(_component_RouterLink, {
                           key: 0,
-                          to: unref(url)("/" + unref(replaceString)(props.viewUrl, scope.row)),
+                          to: _ctx.buttonViewUrl(scope.row),
                           target: "_blank"
                         }, {
                           default: withCtx(() => [
-                            createElementVNode("li", _hoisted_2, [
+                            createElementVNode("li", _hoisted_3, [
                               createVNode(_component_el_icon, null, {
                                 default: withCtx(() => [
                                   createVNode(unref(view_default))
                                 ]),
                                 _: 1
                               }),
-                              _cache[4] || (_cache[4] = createTextVNode()),
-                              _cache[5] || (_cache[5] = createElementVNode("span", { class: "ml-2" }, "Lihat", -1))
+                              _cache[7] || (_cache[7] = createTextVNode()),
+                              _cache[8] || (_cache[8] = createElementVNode("span", { class: "ml-2" }, "Lihat", -1))
                             ])
                           ]),
                           _: 2
                         }, 1032, ["to"])) : createCommentVNode("", true),
-                        _cache[8] || (_cache[8] = createTextVNode()),
-                        props.editUrl ? (openBlock(), createBlock(_component_RouterLink, {
+                        typeof _ctx.buttonEditUrl === "function" ? (openBlock(), createBlock(_component_RouterLink, {
                           key: 1,
-                          to: unref(url)("/" + unref(replaceString)(props.editUrl ?? "", scope.row))
+                          to: _ctx.buttonEditUrl(scope.row)
                         }, {
                           default: withCtx(() => [
-                            createElementVNode("li", _hoisted_3, [
+                            createElementVNode("li", _hoisted_4, [
                               createVNode(_component_el_icon, null, {
                                 default: withCtx(() => [
                                   createVNode(unref(edit_default))
                                 ]),
                                 _: 1
                               }),
-                              _cache[6] || (_cache[6] = createTextVNode()),
-                              _cache[7] || (_cache[7] = createElementVNode("span", { class: "ml-2" }, "Ubah", -1))
+                              _cache[9] || (_cache[9] = createTextVNode()),
+                              _cache[10] || (_cache[10] = createElementVNode("span", { class: "ml-2" }, "Ubah", -1))
                             ])
                           ]),
                           _: 2
                         }, 1032, ["to"])) : createCommentVNode("", true),
-                        _cache[9] || (_cache[9] = createTextVNode()),
                         renderSlot(_ctx.$slots, "action", {
                           row: scope.row
                         })
@@ -975,23 +1038,57 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
               _: 3
             })
           ]),
-          _: 3,
-          __: [10, 11]
+          _: 3
         }, 8, ["data"])), [
           [_directive_loading, loading.value]
         ]),
-        createElementVNode("div", _hoisted_4, [
+        createElementVNode("div", _hoisted_5, [
           createVNode(_component_el_pagination, {
             "page-size": pageSize.value,
-            "onUpdate:pageSize": _cache[0] || (_cache[0] = ($event) => pageSize.value = $event),
+            "onUpdate:pageSize": _cache[1] || (_cache[1] = ($event) => pageSize.value = $event),
             "current-page": currentPage.value,
-            "onUpdate:currentPage": _cache[1] || (_cache[1] = ($event) => currentPage.value = $event),
+            "onUpdate:currentPage": _cache[2] || (_cache[2] = ($event) => currentPage.value = $event),
             total: totalData.value,
             "page-sizes": [10, 25, 50, 75, 100],
             onChange: changePage,
             layout: "sizes, total, prev, pager, next"
           }, null, 8, ["page-size", "current-page", "total"])
-        ])
+        ]),
+        createVNode(_component_el_dialog, {
+          modelValue: dialogDeleteConfirmation.value,
+          "onUpdate:modelValue": _cache[4] || (_cache[4] = ($event) => dialogDeleteConfirmation.value = $event),
+          title: "Konfirmasi",
+          width: "500"
+        }, {
+          footer: withCtx(() => [
+            createElementVNode("div", _hoisted_6, [
+              createVNode(_component_el_button, {
+                onClick: _cache[3] || (_cache[3] = ($event) => dialogDeleteConfirmation.value = false)
+              }, {
+                default: withCtx(() => _cache[11] || (_cache[11] = [
+                  createTextVNode("Cancel")
+                ])),
+                _: 1,
+                __: [11]
+              }),
+              createVNode(_component_el_button, {
+                type: "primary",
+                onClick: remove
+              }, {
+                default: withCtx(() => _cache[12] || (_cache[12] = [
+                  createTextVNode(" Confirm ")
+                ])),
+                _: 1,
+                __: [12]
+              })
+            ])
+          ]),
+          default: withCtx(() => [
+            _cache[13] || (_cache[13] = createElementVNode("span", null, "Anda yakin ingin menghapus data yang Anda pilih ?", -1))
+          ]),
+          _: 1,
+          __: [13]
+        }, 8, ["modelValue"])
       ]);
     };
   }

@@ -1,13 +1,13 @@
 import { Query } from '../types';
+import { RouteLocationRaw } from 'vue-router';
 type __VLS_Props = {
-    apiRelations?: Array<string>;
-    apiColumns?: Array<string>;
-    apiQuery?: Query['queries'];
-    apiOrder?: string;
-    editUrl?: string;
-    fetchUrl: string;
-    removeUrl?: string;
-    tableColumns: Array<{
+    buttonEditUrl?: (row: {
+        id: number | string;
+    }) => RouteLocationRaw;
+    buttonViewUrl?: (row: {
+        id: number | string;
+    }) => RouteLocationRaw;
+    columns: Array<{
         field: string;
         label: string;
         value?: unknown;
@@ -15,14 +15,21 @@ type __VLS_Props = {
         width?: string;
         align?: 'left' | 'center' | 'right';
     }>;
-    viewUrl?: string;
+    setRelations?: Array<string>;
+    setColumns?: Array<string>;
+    setQueries?: Query['queries'];
+    setOrder?: string;
+    url: string;
+    deleteUrl?: string;
 };
 declare function refresh(): void;
+declare function remove(): void;
 declare function __VLS_template(): {
     attrs: Partial<{}>;
     slots: Partial<Record<string, (_: {
         row: any;
     }) => any>> & {
+        buttonDelete?(_: {}): any;
         action?(_: {
             row: any;
         }): any;
@@ -33,6 +40,7 @@ declare function __VLS_template(): {
 type __VLS_TemplateResult = ReturnType<typeof __VLS_template>;
 declare const __VLS_component: import('vue').DefineComponent<__VLS_Props, {
     refresh: typeof refresh;
+    remove: typeof remove;
 }, {}, {}, {}, import('vue').ComponentOptionsMixin, import('vue').ComponentOptionsMixin, {
     tableSelections: (...args: any[]) => void;
 }, string, import('vue').PublicProps, Readonly<__VLS_Props> & Readonly<{

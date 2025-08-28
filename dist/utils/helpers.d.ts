@@ -1,7 +1,7 @@
 import { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 export declare function beautyDate(date: string | undefined, format?: string): string;
 export declare function beautyDateTime(date: string): string;
-export declare function csl(data: any, label?: string): void;
+export declare function csl(data: unknown, label?: string): void;
 export declare function convertStringToHex(input: string | number): string;
 export declare function convertHexToString(input: string): string;
 export declare function defaultType(type: string): 0 | "" | undefined;
@@ -21,11 +21,11 @@ export declare function httpHandleError(error: AxiosError<{
 }>): void;
 export declare function httpStatusCode(status: 'OK' | 'Success' | 'Created' | 'Unauthorized'): 200 | 201 | 401 | 403 | 404;
 export declare function httpValidation(response: AxiosResponse): boolean;
-export declare function http(baseURL?: string): AxiosInstance;
+export declare function http(): AxiosInstance;
 export declare function httpGet(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse>;
-export declare function httpPost(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse>;
+export declare function httpPost(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<AxiosResponse>;
 export declare function httpDelete(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse>;
-export declare function httpPut(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse>;
+export declare function httpPut(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<AxiosResponse>;
 export declare function htmlToPlainText(html: string): string;
 export declare function message(message: string, type: 'success' | 'warning' | 'info' | 'error'): void;
 /**
@@ -38,7 +38,7 @@ export declare function minuteToTime(minute: number | string, leadingZero?: bool
 export declare function numberFormat(number: number, locale?: string, options?: Intl.NumberFormatOptions): string;
 export declare function pascalCase(text: string): string;
 export declare function removeRefreshToken(): void;
-export declare function replaceString(text: string, data: any): string;
+export declare function replaceString(text: string, data: Record<string, unknown>): string;
 /**
  *
  * @param key parameter key, Ex: id
@@ -48,4 +48,4 @@ export declare function setRefreshToken(token: string): void;
 export declare function url(text: string): string;
 export declare function urlToKebab(text: string): string;
 export declare function titleCase(text: string): string;
-export declare function waiting(fn: Function, delay?: number | null): Promise<unknown>;
+export declare function waiting<T>(fn: () => T, delay?: number | null): Promise<T>;
