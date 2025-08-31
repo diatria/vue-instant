@@ -90,22 +90,7 @@ export function getInitials(name: string): string {
     .toUpperCase(); // Pastikan inisial dalam huruf besar
 }
 
-export function getRefreshToken(): string {
-  const tokenName = import.meta.env.VITE_DS_VUE_INSTANT_TOKEN_NAME;
-  if (!tokenName && !getAppConfig()) {
-    throw new Error('Token name cannot be empty');
-  }
-  const snakeCaseTokenName = snakeCase(tokenName);
-  return localStorage.getItem(`${snakeCaseTokenName}_refresh_token`) ?? '';
-}
 
-export function getToken() {
-  const tokenName = import.meta.env.VITE_DS_VUE_INSTANT_TOKEN_NAME;
-  if (!tokenName && !getAppConfig()) {
-    throw new Error('Token name cannot be empty');
-  }
-  return localStorage.getItem(`access_token_${tokenName}`) ?? '';
-}
 
 // # Index H
 
@@ -154,7 +139,7 @@ export function http(): AxiosInstance {
     timeout: 60000,
     headers: {
       Accept: 'application/json',
-      Authorization: `Bearer ${getToken()}`,
+      Authorization: `Bearer `,
     },
     withCredentials: withCredentials ?? true,
   });
@@ -275,12 +260,6 @@ export function numberFormat(number: number, locale?: string, options?: Intl.Num
 // # Index P
 export function pascalCase(text: string) {
   return startCase(text);
-}
-
-// # Index R
-export function removeRefreshToken() {
-  const tokenName = snakeCase(getAppConfig().token_name);
-  localStorage.removeItem(`${tokenName}_refresh_token`);
 }
 
 export function replaceString(text: string, data: Record<string, unknown>) {
