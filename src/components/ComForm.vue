@@ -208,6 +208,7 @@
               v-if="column.type === 'text'"
               v-model="form[column.name]"
               :disabled="column.disabled"
+              :placeholder="column.placeholder"
               @change="onChange"
             />
 
@@ -218,6 +219,7 @@
               v-model="form[column.name]"
               type="textarea"
               :disabled="column.disabled"
+              :placeholder="column.placeholder"
               @change="onChange"
             />
 
@@ -243,6 +245,7 @@
             <el-input
               v-if="column.type === 'password'"
               v-model="form[column.name]"
+              :placeholder="column.placeholder"
               @change="onChange"
               type="password"
               show-password
