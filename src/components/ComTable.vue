@@ -23,11 +23,13 @@ const props = withDefaults(
       align?: 'left' | 'center' | 'right'
     }>
     deleteUrl?: string
+    description?: string
     setRelations?: Array<string>
     setColumns?: Array<string>
     setQueries?: Query['queries']
     setOrder?: string
     toolbarShow?: boolean
+    title?: string
     url: string
   }>(),
   {
@@ -140,21 +142,31 @@ defineExpose({ changeSelection, refresh, remove })
 
 <template>
   <div>
-    <!-- Toolbar -->
-    <div v-if="props.toolbarShow" class="flex justify-end gap-4 pb-4 border-b border-[#ebeef5]">
-      <RouterLink v-if="props.buttonCreateUrl" :to="props.buttonCreateUrl()">
-        <el-button :icon="Plus" type="primary">Tambah</el-button>
-      </RouterLink>
-      <el-button
-        v-if="!$slots.buttonDelete && dataSelected.length && props.buttonDeleteShow"
-        @click="dialogDeleteConfirmation = true"
-        :icon="Delete"
-        type="danger"
-        class="!m-0"
-        >Hapus</el-button
-      >
-      <slot name="buttonDelete"></slot>
-      <el-button v-if="props.buttonFilterShow" class="!m-0">Filter</el-button>
+    <!-- Header -->
+    <div class="flex justify-between p-4 border-b border-[#ebeef5]">
+      <!-- Title -->
+      <div v-if="!$slots.title">
+        <div class="text-xl font-bold">{{ props.title }}</div>
+        <div>{{ props.description }}</div>
+      </div>
+      <slot name="title"></slot>
+
+      <!-- Toolbar -->
+      <div v-if="props.toolbarShow" class="flex justify-end gap-4">
+        <RouterLink v-if="props.buttonCreateUrl" :to="props.buttonCreateUrl()">
+          <el-button :icon="Plus" type="primary">Tambah</el-button>
+        </RouterLink>
+        <el-button
+          v-if="!$slots.buttonDelete && dataSelected.length && props.buttonDeleteShow"
+          @click="dialogDeleteConfirmation = true"
+          :icon="Delete"
+          type="danger"
+          class="!m-0"
+          >Hapus</el-button
+        >
+        <slot name="buttonDelete"></slot>
+        <el-button v-if="props.buttonFilterShow" class="!m-0">Filter</el-button>
+      </div>
     </div>
 
     <!-- Table -->
@@ -247,7 +259,7 @@ defineExpose({ changeSelection, refresh, remove })
     </el-table>
 
     <!-- Pagination -->
-    <div class="flex justify-end mt-4">
+    <div class="flex justify-end p-4">
       <el-pagination
         v-model:page-size="pageSize"
         v-model:current-page="currentPage"

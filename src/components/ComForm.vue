@@ -52,12 +52,14 @@ interface Column {
 interface ComFormProps {
   columns: Column[]
   id?: number
+  description?: string
   fetchUrl?: string
   paramsUrl?: string
   queries?: Query
   relations?: any[]
   rules?: FormRules
   storeUrl?: string
+  title?: string
   url: string
 }
 
@@ -176,136 +178,148 @@ defineExpose({
 </script>
 
 <template>
-  <el-form
-    :model="form"
-    :rules="props.rules"
-    ref="ruleFormRef"
-    label-position="top"
-    label-width="auto"
-    status-icon
-  >
-    <el-row :gutter="20">
-      <template v-for="(column, index) in props.columns" :key="index">
-        <el-col
-          v-if="!['hide'].includes(column.type)"
-          :span="columnGrid(column.grid ?? 24)"
-          :sm="columnGrid(column.grid ?? 24, 'sm')"
-          :md="columnGrid(column.grid ?? 24, 'md')"
-          :lg="columnGrid(column.grid ?? 24, 'lg')"
-          :xl="columnGrid(column.grid ?? 24, 'xl')"
-        >
-          <el-form-item
-            v-if="!['checkbox', 'slot:el-form-item'].includes(column.type)"
-            :label="column.label"
-            :prop="column.name"
-          >
-            <!-- Type Text -->
-            <el-input
-              v-if="column.type === 'text'"
-              v-model="form[column.name]"
-              :disabled="column.disabled"
-              :placeholder="column.placeholder"
-              @change="onChange"
-            />
-
-            <!-- Type Textarea -->
-            <el-input
-              v-if="column.type === 'textarea'"
-              v-model="form[column.name]"
-              type="textarea"
-              :disabled="column.disabled"
-              :placeholder="column.placeholder"
-              @change="onChange"
-            />
-
-            <!-- Type Select -->
-            <ComSelect
-              v-if="column.type === 'select'"
-              v-model="form[column.name]"
-              :disabled="column.disabled"
-              :fetch-on-click="column.select?.fetch_on_click"
-              :field-label="column.select?.field_label ?? 'name'"
-              :field-value="column.select?.field_value ?? 'id'"
-              :field-search-column="column.select?.field_search_column"
-              :options="column.select?.options"
-              :placeholder="column.placeholder"
-              :remote="column.select?.remote"
-              :url="column.select?.url"
-              @change="onChange"
-            />
-
-            <!-- Type Password -->
-            <el-input
-              v-if="column.type === 'password'"
-              v-model="form[column.name]"
-              :placeholder="column.placeholder"
-              @change="onChange"
-              type="password"
-              show-password
-            />
-
-            <!-- Type Switch -->
-            <el-switch
-              v-if="column.type === 'switch'"
-              v-model="form[column.name]"
-              @change="onChange"
-              :active-icon="Check"
-              :inactive-icon="Close"
-            />
-
-            <!-- Type Date -->
-            <el-date-picker
-              v-if="column.type === 'date'"
-              v-model="form[column.name]"
-              type="date"
-              :placeholder="column.placeholder"
-            />
-
-            <!-- Type Date Time -->
-            <el-date-picker
-              v-if="column.type === 'date-time'"
-              v-model="form[column.name]"
-              type="datetime"
-              :placeholder="column.placeholder"
-              value-format="YYYY-MM-DD HH:mm:ss"
-            />
-
-            <el-time-picker
-              v-if="column.type === 'time'"
-              v-model="form[column.name]"
-              :placeholder="column.placeholder"
-              value-format="HH:mm:ss"
-              class="!w-full"
-            />
-
-            <!-- Type Inject Html -->
-            <slot v-if="column.type === 'slot'" :name="column.name" :form="form" />
-          </el-form-item>
-
-          <el-form-item v-if="['checkbox'].includes(column.type)" :prop="column.name">
-            <el-checkbox
-              v-if="column.type === 'checkbox'"
-              v-model="form[column.name]"
-              @change="onChange"
-              :label="column.label"
-            />
-          </el-form-item>
-
-          <slot v-if="column.type === 'slot:el-form-item'" :name="column.name" :form="form" />
-        </el-col>
-      </template>
-    </el-row>
-
-    <div class="flex justify-end border-t border-slate-200 border-solid pt-4">
-      <el-button :icon="Close" @click="emits('back')" type="danger" plain>Batal</el-button>
-
-      <el-button v-if="props.id" @click="update" :icon="Promotion" type="primary" class="ml-4">
-        Perbaharui
-      </el-button>
-
-      <el-button v-else @click="store" :icon="Promotion" type="primary" class="ml-4">
-        Simpan
-      </el-button>
+  <div>
+    <!-- Header -->
+    <div class="flex justify-between p-4 border-b border-[#ebeef5]">
+      <!-- Title -->
+      <div v-if="!$slots.title">
+        <div class="text-xl font-bold">{{ props.title }}</div>
+        <div>{{ props.description }}</div>
+      </div>
+      <slot name="title"></slot>
     </div>
-  </el-form>
+    <el-form
+      :model="form"
+      :rules="props.rules"
+      class="p-4"
+      ref="ruleFormRef"
+      label-position="top"
+      label-width="auto"
+      status-icon
+    >
+      <el-row :gutter="20">
+        <template v-for="(column, index) in props.columns" :key="index">
+          <el-col
+            v-if="!['hide'].includes(column.type)"
+            :span="columnGrid(column.grid ?? 24)"
+            :sm="columnGrid(column.grid ?? 24, 'sm')"
+            :md="columnGrid(column.grid ?? 24, 'md')"
+            :lg="columnGrid(column.grid ?? 24, 'lg')"
+            :xl="columnGrid(column.grid ?? 24, 'xl')"
+          >
+            <el-form-item
+              v-if="!['checkbox', 'slot:el-form-item'].includes(column.type)"
+              :label="column.label"
+              :prop="column.name"
+            >
+              <!-- Type Text -->
+              <el-input
+                v-if="column.type === 'text'"
+                v-model="form[column.name]"
+                :disabled="column.disabled"
+                :placeholder="column.placeholder"
+                @change="onChange"
+              />
+
+              <!-- Type Textarea -->
+              <el-input
+                v-if="column.type === 'textarea'"
+                v-model="form[column.name]"
+                type="textarea"
+                :disabled="column.disabled"
+                :placeholder="column.placeholder"
+                @change="onChange"
+              />
+
+              <!-- Type Select -->
+              <ComSelect
+                v-if="column.type === 'select'"
+                v-model="form[column.name]"
+                :disabled="column.disabled"
+                :fetch-on-click="column.select?.fetch_on_click"
+                :field-label="column.select?.field_label ?? 'name'"
+                :field-value="column.select?.field_value ?? 'id'"
+                :field-search-column="column.select?.field_search_column"
+                :options="column.select?.options"
+                :placeholder="column.placeholder"
+                :remote="column.select?.remote"
+                :url="column.select?.url"
+                @change="onChange"
+              />
+
+              <!-- Type Password -->
+              <el-input
+                v-if="column.type === 'password'"
+                v-model="form[column.name]"
+                :placeholder="column.placeholder"
+                @change="onChange"
+                type="password"
+                show-password
+              />
+
+              <!-- Type Switch -->
+              <el-switch
+                v-if="column.type === 'switch'"
+                v-model="form[column.name]"
+                @change="onChange"
+                :active-icon="Check"
+                :inactive-icon="Close"
+              />
+
+              <!-- Type Date -->
+              <el-date-picker
+                v-if="column.type === 'date'"
+                v-model="form[column.name]"
+                type="date"
+                :placeholder="column.placeholder"
+              />
+
+              <!-- Type Date Time -->
+              <el-date-picker
+                v-if="column.type === 'date-time'"
+                v-model="form[column.name]"
+                type="datetime"
+                :placeholder="column.placeholder"
+                value-format="YYYY-MM-DD HH:mm:ss"
+              />
+
+              <el-time-picker
+                v-if="column.type === 'time'"
+                v-model="form[column.name]"
+                :placeholder="column.placeholder"
+                value-format="HH:mm:ss"
+                class="!w-full"
+              />
+
+              <!-- Type Inject Html -->
+              <slot v-if="column.type === 'slot'" :name="column.name" :form="form" />
+            </el-form-item>
+
+            <el-form-item v-if="['checkbox'].includes(column.type)" :prop="column.name">
+              <el-checkbox
+                v-if="column.type === 'checkbox'"
+                v-model="form[column.name]"
+                @change="onChange"
+                :label="column.label"
+              />
+            </el-form-item>
+
+            <slot v-if="column.type === 'slot:el-form-item'" :name="column.name" :form="form" />
+          </el-col>
+        </template>
+      </el-row>
+
+      <div class="flex justify-end border-t border-slate-200 border-solid pt-4">
+        <el-button :icon="Close" @click="emits('back')" type="danger" plain>Batal</el-button>
+
+        <el-button v-if="props.id" @click="update" :icon="Promotion" type="primary" class="ml-4">
+          Perbaharui
+        </el-button>
+
+        <el-button v-else @click="store" :icon="Promotion" type="primary" class="ml-4">
+          Simpan
+        </el-button>
+      </div>
+    </el-form>
+  </div>
 </template>
