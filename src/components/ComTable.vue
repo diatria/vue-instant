@@ -24,6 +24,7 @@ const props = withDefaults(
     }>
     deleteUrl?: string
     description?: string
+    paginationShow?: boolean
     setRelations?: Array<string>
     setColumns?: Array<string>
     setQueries?: Query['queries']
@@ -36,6 +37,7 @@ const props = withDefaults(
     buttonMoreFieldShow: true,
     buttonFilterShow: true,
     buttonDeleteShow: true,
+    paginationShow: true,
     toolbarShow: true,
   },
 )
@@ -259,7 +261,7 @@ defineExpose({ changeSelection, refresh, remove })
     </el-table>
 
     <!-- Pagination -->
-    <div class="flex justify-end p-4">
+    <div v-if="props.paginationShow" class="flex justify-end p-4">
       <el-pagination
         v-model:page-size="pageSize"
         v-model:current-page="currentPage"
