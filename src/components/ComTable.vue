@@ -155,9 +155,11 @@ defineExpose({ changeSelection, refresh, remove })
 
       <!-- Toolbar -->
       <div v-if="props.toolbarShow" class="flex justify-end gap-4">
+        <slot name="toolbar-1"></slot>
         <RouterLink v-if="props.buttonCreateUrl" :to="props.buttonCreateUrl()">
           <el-button :icon="Plus" type="primary">Tambah</el-button>
         </RouterLink>
+        <slot name="toolbar-2"></slot>
         <el-button
           v-if="!$slots.buttonDelete && dataSelected.length && props.buttonDeleteShow"
           @click="dialogDeleteConfirmation = true"
@@ -167,7 +169,9 @@ defineExpose({ changeSelection, refresh, remove })
           >Hapus</el-button
         >
         <slot name="buttonDelete"></slot>
+        <slot name="toolbar-3"></slot>
         <el-button v-if="props.buttonFilterShow" class="!m-0">Filter</el-button>
+        <slot name="toolbar-4"></slot>
       </div>
     </div>
 
