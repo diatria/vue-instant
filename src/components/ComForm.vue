@@ -318,9 +318,18 @@ defineExpose({
           Perbaharui
         </el-button>
 
-        <el-button v-else @click="store" :icon="Promotion" type="primary" class="ml-4">
-          Simpan
-        </el-button>
+        <template v-else>
+          <el-button
+            v-if="!$slots.buttonStore"
+            @click="store"
+            :icon="Promotion"
+            type="primary"
+            class="ml-4"
+          >
+            Simpan
+          </el-button>
+          <slot name="buttonStore" />
+        </template>
       </div>
     </el-form>
   </div>
