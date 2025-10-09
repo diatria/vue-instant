@@ -132,8 +132,10 @@ async function store() {
 
   const url = props.storeUrl ?? props.url
   await ruleFormRef.value.validate((valid) => {
+    let paramsUrl = ''
+    if (props.paramsUrl) paramsUrl = `?${props.paramsUrl}`
     if (valid) {
-      httpPost(`${url}?${props.paramsUrl}`, form)
+      httpPost(`${url}${paramsUrl}`, form)
         .then((result: ResponseAxios<unknown>) => {
           if (httpValidation(result)) {
             message(result.data.message, 'success')
