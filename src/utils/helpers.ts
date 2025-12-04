@@ -3,76 +3,76 @@ import axios, {
   type AxiosInstance,
   type AxiosRequestConfig,
   type AxiosResponse,
-} from 'axios';
-import dayjs from 'dayjs';
-import { ElMessage } from 'element-plus';
-import { kebabCase, snakeCase, startCase } from 'lodash';
-import { getAppConfig } from '../config/runtimeConfig';
-import { useRoute, useRouter } from 'vue-router';
+} from 'axios'
+import dayjs from 'dayjs'
+import { ElMessage } from 'element-plus'
+import { kebabCase, snakeCase, startCase } from 'lodash'
+import { getAppConfig } from '../config/runtimeConfig'
+import { useRoute, useRouter } from 'vue-router'
 
 // # INDEX B
 export function beautyDate(date: string | undefined, format?: string) {
-  if (date === undefined) return '-';
-  if (format) return dayjs(date).format(format);
-  return dayjs(date).format('DD MMM YYYY');
+  if (date === undefined) return '-'
+  if (format) return dayjs(date).format(format)
+  return dayjs(date).format('DD MMM YYYY')
 }
 
 export function beautyDateTime(date: string) {
-  return dayjs(date).format('DD MMM YYYY HH:mm');
+  return dayjs(date).format('DD MMM YYYY HH:mm')
 }
 
 // # INDEX C
 export function csl(data: unknown, label?: string) {
-  if (label) console.log(label, data);
-  else console.log(data);
+  if (label) console.log(label, data)
+  else console.log(data)
 }
 
 export function convertStringToHex(input: string | number) {
-  const value = typeof input === 'number' ? input.toString() : input;
+  const value = typeof input === 'number' ? input.toString() : input
   return Array.from(`csl:${value}`)
-    .map(char => char.charCodeAt(0).toString(16))
-    .join('');
+    .map((char) => char.charCodeAt(0).toString(16))
+    .join('')
 }
 
 export function convertHexToString(input: string) {
-  let output = '';
+  let output = ''
   for (let i = 0; i < input.length; i += 2) {
-    output += String.fromCharCode(parseInt(input.substr(i, 2), 16));
+    output += String.fromCharCode(parseInt(input.substr(i, 2), 16))
   }
-  return output.replace('csl:', '');
+  return output.replace('csl:', '')
 }
 
 // # Index D
 export function defaultType(type: string) {
-  if (['text', 'date', 'dateTime'].includes(type)) return '';
-  if (type === 'number') return 0;
+  if (['text', 'date', 'dateTime'].includes(type)) return ''
+  if (type === 'number') return 0
 }
 
 // # Index G
 
 export function getBrowserType() {
   const test = (regexp: RegExp) => {
-    return regexp.test(navigator.userAgent);
-  };
+    return regexp.test(navigator.userAgent)
+  }
 
   if (test(/opr\//i)) {
-    return 'Opera';
+    return 'Opera'
   } else if (test(/edg/i)) {
-    return 'Microsoft Edge';
+    return 'Microsoft Edge'
   } else if (test(/chrome|chromium|crios/i)) {
-    return 'Google Chrome';
+    return 'Google Chrome'
   } else if (test(/firefox|fxios/i)) {
-    return 'Mozilla Firefox';
+    return 'Mozilla Firefox'
   } else if (test(/safari/i)) {
-    return 'Apple Safari';
+    return 'Apple Safari'
   } else if (test(/trident/i)) {
-    return 'Microsoft Internet Explorer';
+    return 'Microsoft Internet Explorer'
   } else if (test(/ucbrowser/i)) {
-    return 'UC Browser';
+    return 'UC Browser'
   } else if (test(/samsungbrowser/i)) {
-    return 'Samsung Browser';
+    return 'Samsung Browser'
   } else {
-    return 'Unknown browser';
+    return 'Unknown browser'
   }
 }
 
@@ -85,30 +85,28 @@ export function getBrowserType() {
 export function getInitials(name: string): string {
   return name
     .split(' ') // Pisahkan berdasarkan spasi
-    .map(word => word[0]) // Ambil huruf pertama dari setiap kata
+    .map((word) => word[0]) // Ambil huruf pertama dari setiap kata
     .join('') // Gabungkan menjadi satu string
-    .toUpperCase(); // Pastikan inisial dalam huruf besar
+    .toUpperCase() // Pastikan inisial dalam huruf besar
 }
-
-
 
 // # Index H
 
 export function httpHandleError(error: AxiosError<{ message: string; code: string }>) {
-  const router = useRouter();
+  const router = useRouter()
   // Handle 403 forbidden
-  if (error.response?.data.code === 'FORBIDDEN') router.push('/403');
-  if (error.response) return message(error.response.data.message || '', 'error');
-  return message(error.message, 'error');
+  if (error.response?.data.code === 'FORBIDDEN') router.push('/403')
+  if (error.response) return message(error.response.data.message || '', 'error')
+  return message(error.message, 'error')
 }
 
 export function httpStatusCode(status: 'OK' | 'Success' | 'Created' | 'Unauthorized') {
-  if (status === 'OK') return 200;
-  if (status === 'Success') return 200;
-  if (status === 'Created') return 201;
-  if (status === 'Unauthorized') return 401;
-  if (status === 'Unauthorized') return 403;
-  return 404;
+  if (status === 'OK') return 200
+  if (status === 'Success') return 200
+  if (status === 'Created') return 201
+  if (status === 'Unauthorized') return 401
+  if (status === 'Unauthorized') return 403
+  return 404
 }
 
 export function httpValidation(response: AxiosResponse): boolean {
@@ -123,16 +121,16 @@ export function httpValidation(response: AxiosResponse): boolean {
     { code: 429, message: 'Too Many Request', type: 'error' },
     { code: 500, message: 'Internal Server Error', type: 'error' },
     { code: 502, message: 'Bad Gateway', type: 'error' },
-  ];
-  const found = httpResponse.find(http => http.code === response.status);
-  if (found) return found.type === 'success';
-  return false;
+  ]
+  const found = httpResponse.find((http) => http.code === response.status)
+  if (found) return found.type === 'success'
+  return false
 }
 
 export function http(): AxiosInstance {
-  let withCredentials = import.meta.env.VITE_DS_VUE_INSTANT_HTTP_WITH_TOKEN;
+  let withCredentials = import.meta.env.VITE_DS_VUE_INSTANT_HTTP_WITH_TOKEN
   if (!withCredentials && getAppConfig()) {
-    withCredentials = getAppConfig().http?.withCredentials;
+    withCredentials = getAppConfig().http?.withCredentials
   }
 
   return axios.create({
@@ -141,90 +139,91 @@ export function http(): AxiosInstance {
       Accept: 'application/json',
       Authorization: `Bearer `,
     },
+    baseURL: import.meta.env.VITE_DS_VUE_INSTANT_BASE_URL,
     withCredentials: withCredentials ?? true,
-  });
+  })
 }
 
 export function httpGet(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse> {
   return new Promise((resolve, reject) => {
     http()
       .get(url, config)
-      .then(result => resolve(result))
-      .catch(error => {
-        reject(error);
+      .then((result) => resolve(result))
+      .catch((error) => {
+        reject(error)
         // if ((error?.response?.status || 500) === httpStatusCode('Unauthorized')) {
         //   redirectTo('/')
         // }
-      });
-  });
+      })
+  })
 }
 
 export function httpPost(
   url: string,
   data?: unknown,
-  config?: AxiosRequestConfig
+  config?: AxiosRequestConfig,
 ): Promise<AxiosResponse> {
   return new Promise((resolve, reject) => {
     http()
       .post(url, data, config)
-      .then(result => resolve(result))
-      .catch(error => {
-        reject(error);
+      .then((result) => resolve(result))
+      .catch((error) => {
+        reject(error)
         // if ((error?.response?.status || 500) === httpStatusCode('Unauthorized')) {
         //   redirectTo('/')
         // }
-      });
-  });
+      })
+  })
 }
 
 export function httpDelete(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse> {
   return new Promise((resolve, reject) => {
     http()
       .delete(url, config)
-      .then(result => resolve(result))
-      .catch(error => {
-        reject(error);
+      .then((result) => resolve(result))
+      .catch((error) => {
+        reject(error)
         // if ((error?.response?.status || 500) === httpStatusCode('Unauthorized')) {
         //   redirectTo('/')
         // }
-      });
-  });
+      })
+  })
 }
 
 export function httpPut(
   url: string,
   data?: unknown,
-  config?: AxiosRequestConfig
+  config?: AxiosRequestConfig,
 ): Promise<AxiosResponse> {
   return new Promise((resolve, reject) => {
     http()
       .put(url, data, config)
-      .then(result => resolve(result))
-      .catch(error => {
-        reject(error);
+      .then((result) => resolve(result))
+      .catch((error) => {
+        reject(error)
         // if ((error?.response?.status || 500) === httpStatusCode('Unauthorized')) {
         //   redirectTo('/')
         // }
-      });
-  });
+      })
+  })
 }
 
 export function htmlToPlainText(html: string) {
   // Create a new div element
-  const tempDivElement = document.createElement('div');
+  const tempDivElement = document.createElement('div')
   // Set the HTML content with the given value
-  tempDivElement.innerHTML = html;
+  tempDivElement.innerHTML = html
   // Retrieve the text property of the element
-  return tempDivElement.textContent || tempDivElement.innerText || '';
+  return tempDivElement.textContent || tempDivElement.innerText || ''
 }
 
 // # Index M
 export function message(message: string, type: 'success' | 'warning' | 'info' | 'error') {
   // return message
-  if (type === 'success') ElMessage.success({ grouping: true, message });
-  if (type === 'warning') ElMessage.warning({ grouping: true, message });
-  if (type === 'info') ElMessage.info({ grouping: true, message });
-  if (type === 'error') ElMessage.error({ grouping: true, message });
+  if (type === 'success') ElMessage.success({ grouping: true, message })
+  if (type === 'warning') ElMessage.warning({ grouping: true, message })
+  if (type === 'info') ElMessage.info({ grouping: true, message })
+  if (type === 'error') ElMessage.error({ grouping: true, message })
 }
 
 /**
@@ -234,52 +233,52 @@ export function message(message: string, type: 'success' | 'warning' | 'info' | 
  * @returns `{Hours}:{Minute}:00`
  */
 export function minuteToTime(minute: number | string, leadingZero?: boolean): string {
-  if (typeof minute === 'string') minute = Number(minute);
+  if (typeof minute === 'string') minute = Number(minute)
 
-  let minutes: number | string = minute % 60;
-  let hours: number | string = (minute - minutes) / 60;
+  let minutes: number | string = minute % 60
+  let hours: number | string = (minute - minutes) / 60
 
   if (leadingZero) {
-    minutes = minutes < 10 ? `0${minutes}` : minutes;
-    hours = hours < 10 ? `0${hours}` : hours;
+    minutes = minutes < 10 ? `0${minutes}` : minutes
+    hours = hours < 10 ? `0${hours}` : hours
   }
-  return `${hours}:${minutes}:00`;
+  return `${hours}:${minutes}:00`
 }
 
 // # Index N
 export function numberFormat(number: number, locale?: string, options?: Intl.NumberFormatOptions) {
-  const localeDefault = 'id-ID';
-  const currencyDefault = 'IDR';
+  const localeDefault = 'id-ID'
+  const currencyDefault = 'IDR'
   return new Intl.NumberFormat(locale ?? localeDefault, {
     style: options?.style ?? 'currency',
     currency: options?.currency ?? currencyDefault,
     maximumFractionDigits: 0,
-  }).format(number);
+  }).format(number)
 }
 
 // # Index P
 export function pascalCase(text: string) {
-  return startCase(text);
+  return startCase(text)
 }
 
 export function replaceString(text: string, data: Record<string, unknown>) {
-  if (!data) return text;
+  if (!data) return text
 
   // Ekspresi reguler untuk mencari "{params}"
-  const regex = /\{(\w+?)\}/g;
+  const regex = /\{(\w+?)\}/g
 
-  const matches: string[] = [];
-  let match;
+  const matches: string[] = []
+  let match
   while ((match = regex.exec(text)) !== null) {
-    matches.push(match[1]);
+    matches.push(match[1])
   }
 
-  let finalText = text;
-  matches.forEach(item => {
-    finalText = finalText.replace(`{${item}}`, String((data as Record<string, unknown>)[item]));
-  });
+  let finalText = text
+  matches.forEach((item) => {
+    finalText = finalText.replace(`{${item}}`, String((data as Record<string, unknown>)[item]))
+  })
 
-  return finalText ?? '';
+  return finalText ?? ''
 }
 
 /**
@@ -287,39 +286,39 @@ export function replaceString(text: string, data: Record<string, unknown>) {
  * @param key parameter key, Ex: id
  */
 export function routeParam(key: string): string | null {
-  const route = useRoute();
-  return route.params[key]?.toString() || null;
+  const route = useRoute()
+  return route.params[key]?.toString() || null
 }
 
 // # S
 export function setRefreshToken(token: string) {
-  const tokenName = snakeCase(getAppConfig().token_name);
-  localStorage.setItem(`${tokenName}_refresh_token`, token);
+  const tokenName = snakeCase(getAppConfig().token_name)
+  localStorage.setItem(`${tokenName}_refresh_token`, token)
 }
 
 export function url(text: string) {
-  let replaced = text;
+  let replaced = text
 
   // menggantikan '//' menjadi '/'
-  replaced = replaced.replace(/\/\//g, '/');
-  return replaced;
+  replaced = replaced.replace(/\/\//g, '/')
+  return replaced
 }
 
 // # Index U
 export function urlToKebab(text: string) {
-  return `/${kebabCase(text)}`;
+  return `/${kebabCase(text)}`
 }
 
 // # Index T
 export function titleCase(text: string) {
-  return startCase(text);
+  return startCase(text)
 }
 
 // # Index W
 export function waiting<T>(fn: () => T, delay: number | null = 500): Promise<T> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(fn());
-    }, delay || 500);
-  });
+      resolve(fn())
+    }, delay || 500)
+  })
 }
