@@ -144,7 +144,7 @@ export function http(): AxiosInstance {
   })
 }
 
-export function httpGet(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse> {
+export function httpGet<T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
   return new Promise((resolve, reject) => {
     http()
       .get(url, config)
