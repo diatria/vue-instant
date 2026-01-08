@@ -29,6 +29,9 @@ const props = withDefaults(
     setColumns?: Array<string>
     setQueries?: Query['queries']
     setOrder?: string
+    style?: {
+      popOverWidth: number
+    }
     toolbarShow?: boolean
     title?: string
     url: string
@@ -224,7 +227,12 @@ defineExpose({ changeSelection, refresh, remove })
             v-if="props.buttonMoreFieldShow"
             class="hover:cursor-pointer hover:bg-slate-200 justify-center rounded flex items-center"
           >
-            <el-popover placement="bottom" :width="150" popper-class="!p-0" trigger="click">
+            <el-popover
+              placement="bottom"
+              :width="props.style?.popOverWidth ?? 150"
+              popper-class="!p-0"
+              trigger="click"
+            >
               <template #reference>
                 <el-icon>
                   <MoreFilled />
