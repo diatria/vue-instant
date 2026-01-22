@@ -11,13 +11,12 @@ import { Check, Close, Promotion } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { onBeforeMount, onMounted, reactive, ref } from 'vue'
 import ComSelect from './ComSelect.vue'
-import { type Query } from '@/types'
-import type { ResponseAxios } from '@/types/response'
+import type { Query } from '../types'
 
 type ColumnSelect = {
   options?: Array<unknown>
   url?: string
-  field_label?: string | ((row: any) => any)
+  field_label?: string | ((row: Record<string, unknown>) => string)
   field_value?: string
   field_search_column?: string
   fetch_on_click?: boolean
@@ -56,7 +55,7 @@ interface ComFormProps {
   fetchUrl?: string
   paramsUrl?: string
   queries?: Query
-  relations?: any[]
+  relations?: string[]
   rules?: FormRules
   storeUrl?: string
   title?: string
@@ -84,13 +83,13 @@ function columnGrid(
 
 function getData() {
   const url = props.fetchUrl ?? props.url
-  httpGet(`${url}/${props.id}`, {
+  httpGet<{ data: unknown }>(`${url}/${props.id}`, {
     params: {
       queries: props.queries,
       relations: props.relations,
     },
   })
-    .then((result: ResponseAxios<unknown>) => {
+    .then((result) => {
       Object.assign(form, result.data.data)
       emits('form', result.data.data)
     })
@@ -136,7 +135,7 @@ async function store() {
     if (props.paramsUrl) paramsUrl = `?${props.paramsUrl}`
     if (valid) {
       httpPost(`${url}${paramsUrl}`, form)
-        .then((result: ResponseAxios<unknown>) => {
+        .then((result) => {
           if (httpValidation(result)) {
             message(result.data.message, 'success')
             emits('onStored', result.data.data)
@@ -154,7 +153,7 @@ async function update() {
   await ruleFormRef.value.validate((valid) => {
     if (valid) {
       httpPut(`${url}/${props.id}?${props.paramsUrl}`, form)
-        .then((result: ResponseAxios<unknown>) => {
+        .then((result) => {
           if (httpValidation(result)) {
             message(result.data.message, 'success')
             emits('onUpdated', result.data.data)

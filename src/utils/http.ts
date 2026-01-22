@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 
 export type HttpOptions = {
   base_path?: string
@@ -59,15 +59,27 @@ export class HttpBuilder {
     return this.build().get<T>(url, config)
   }
 
-  post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+  post<T, D = unknown>(
+    url: string,
+    data?: D,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<T>> {
     return this.build().post<T>(url, data, config)
   }
 
-  put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+  put<T, D = unknown>(
+    url: string,
+    data?: D,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<T>> {
     return this.build().put<T>(url, data, config)
   }
 
-  patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+  patch<T, D = unknown>(
+    url: string,
+    data?: D,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<T>> {
     return this.build().patch<T>(url, data, config)
   }
 
@@ -87,7 +99,10 @@ export class HttpBuilder {
   // Optional Interceptor Helper
   // ========================
 
-  addInterceptor(onSuccess: (res: AxiosResponse) => any, onError: (err: any) => any) {
+  addInterceptor(
+    onSuccess: (res: AxiosResponse) => AxiosResponse | Promise<AxiosResponse>,
+    onError: (err: unknown) => unknown,
+  ) {
     this.build().interceptors.response.use(onSuccess, onError)
     return this
   }

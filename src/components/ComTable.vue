@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import type { Query } from '../types'
+import type { Pagination, Query } from '../types'
 import type { RouteLocationRaw } from 'vue-router'
 import { onMounted, reactive, ref } from 'vue'
-import { httpDelete, httpGet, httpHandleError } from '../utils/helpers'
+import { httpDelete, httpHandleError } from '../utils/helpers'
 import { Delete, Edit, MoreFilled, Plus, View } from '@element-plus/icons-vue'
+import { HttpBuilder } from '../utils/http'
 
 const emits = defineEmits(['onReady', 'tableSelections'])
 const props = withDefaults(
@@ -49,12 +50,13 @@ const data = ref<Array<Record<string, unknown>>>([])
 const dataSelected = ref<Array<unknown>>([])
 const dialogDeleteConfirmation = ref<boolean>()
 const currentPage = ref(1)
+const http = new HttpBuilder()
 const loading = ref(true)
 const pageSize = ref(10)
 const tableRef = ref()
 const totalData = ref(0)
 
-const state = reactive({
+const state = reactive<{ data: unknown; collection: { data: Record<string, unknown>[] } }>({
   data: {},
   collection: {
     data: [],
@@ -76,16 +78,17 @@ function changeSelection(values: number[]) {
 
 function fetchingDataFromServer() {
   loading.value = true
-  httpGet(props.url, {
-    params: {
-      relations: props.setRelations,
-      columns: props.setColumns,
-      pagination_length: pageSize.value,
-      page: currentPage.value,
-      queries: props.setQueries,
-      order: props.setOrder,
-    },
-  })
+  http
+    .get<{ data: Pagination<Record<string, unknown>> }>(props.url, {
+      params: {
+        relations: props.setRelations,
+        columns: props.setColumns,
+        pagination_length: pageSize.value,
+        page: currentPage.value,
+        queries: props.setQueries,
+        order: props.setOrder,
+      },
+    })
     .then((result) => {
       loading.value = false
       data.value = result.data.data.data
@@ -131,7 +134,7 @@ function remove() {
       id: ids,
     },
   })
-    .then((result) => {
+    .then(() => {
       refresh()
       dialogDeleteConfirmation.value = false
     })
