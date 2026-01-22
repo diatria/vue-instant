@@ -8,7 +8,15 @@ import {
   message,
 } from '../utils/helpers'
 import { Check, Close, Promotion } from '@element-plus/icons-vue'
-import type { FormInstance, FormRules } from 'element-plus'
+import type {
+  FormInstance,
+  FormRules,
+  UploadFile,
+  UploadInstance,
+  UploadProps,
+  UploadRawFile,
+} from 'element-plus'
+import { genFileId } from 'element-plus'
 import { onBeforeMount, onMounted, reactive, ref } from 'vue'
 import ComSelect from './ComSelect.vue'
 import type { Query } from '../types'
@@ -23,6 +31,10 @@ type ColumnSelect = {
   remote?: boolean
 }
 
+type ColumnUpload = {
+  url: string
+}
+
 type ColumnType =
   | 'text'
   | 'textarea'
@@ -33,6 +45,7 @@ type ColumnType =
   | 'date'
   | 'date-time'
   | 'time'
+  | 'upload'
   | 'slot'
   | 'slot:el-form-item'
   | 'hide'
@@ -42,9 +55,10 @@ interface Column {
   label?: string
   type: ColumnType
   grid?: number | Record<string, number>
-  value?: string | number
+  value?: string | number | UploadInstance
   disabled?: boolean
   select?: ColumnSelect
+  upload?: ColumnUpload
   placeholder?: string
 }
 
@@ -65,8 +79,9 @@ interface ComFormProps {
 const props = defineProps<ComFormProps>()
 const emits = defineEmits(['back', 'onStored', 'onUpdated', 'delete', 'form'])
 
-const form: Record<string, string | number> = reactive({})
+const form: Record<string, string | number | UploadInstance> = reactive({})
 const ruleFormRef = ref<FormInstance>()
+const uploadRefs: Record<string, UploadInstance> = {}
 
 function columnGrid(
   column: number | Record<string, number>,
@@ -96,6 +111,20 @@ function getData() {
     .catch(httpHandleError)
 }
 
+/**
+ * Function for upload file
+ *
+ */
+const handleExceed = (files: File[], uploadFiles: UploadFile[], columnName?: string) => {
+  const uploadRef = columnName ? uploadRefs[columnName] : Object.values(uploadRefs)[0]
+  if (!uploadRef) return
+
+  uploadRef.clearFiles()
+  const file = files[0] as UploadRawFile
+  file.uid = genFileId()
+  uploadRef.handleStart(file)
+}
+
 function initializeForm() {
   props.columns.forEach((column) => {
     if (column.type === 'select') {
@@ -123,6 +152,20 @@ function onChange() {
 }
 
 /**
+ * Submit all file uploads
+ */
+async function submitAllUploads() {
+  const uploadPromises = Object.values(uploadRefs).map((uploadRef) => {
+    return new Promise<void>((resolve) => {
+      uploadRef.submit()
+      resolve()
+    })
+  })
+
+  return Promise.all(uploadPromises)
+}
+
+/**
  * Submit data untuk disimpan
  */
 async function store() {
@@ -130,18 +173,26 @@ async function store() {
   if (!ruleFormRef.value) return
 
   const url = props.storeUrl ?? props.url
-  await ruleFormRef.value.validate((valid) => {
+  await ruleFormRef.value.validate(async (valid) => {
     let paramsUrl = ''
     if (props.paramsUrl) paramsUrl = `?${props.paramsUrl}`
     if (valid) {
-      httpPost(`${url}${paramsUrl}`, form)
-        .then((result) => {
-          if (httpValidation(result)) {
-            message(result.data.message, 'success')
-            emits('onStored', result.data.data)
-          }
-        })
-        .catch(httpHandleError)
+      try {
+        // Upload all files first
+        await submitAllUploads()
+
+        // Then submit the form
+        httpPost(`${url}${paramsUrl}`, form)
+          .then((result) => {
+            if (httpValidation(result)) {
+              message(result.data.message, 'success')
+              emits('onStored', result.data.data)
+            }
+          })
+          .catch(httpHandleError)
+      } catch (error) {
+        httpHandleError(error as any)
+      }
     }
   })
 }
@@ -284,6 +335,7 @@ defineExpose({
                 value-format="YYYY-MM-DD HH:mm:ss"
               />
 
+              <!-- Type Time -->
               <el-time-picker
                 v-if="column.type === 'time'"
                 v-model="form[column.name]"
@@ -291,6 +343,29 @@ defineExpose({
                 value-format="HH:mm:ss"
                 class="!w-full"
               />
+
+              <!-- Type File Upload -->
+              <el-upload
+                v-if="column.type === 'upload'"
+                :ref="
+                  (el: any) => {
+                    if (el) uploadRefs[column.name] = el as any
+                  }
+                "
+                :action="column.upload?.url"
+                :limit="1"
+                :on-exceed="(files: File[]) => handleExceed(files, [], column.name)"
+                :auto-upload="false"
+              >
+                <template #trigger>
+                  <el-button type="primary">select file</el-button>
+                </template>
+                <template #tip>
+                  <div class="el-upload__tip text-red">
+                    limit 1 file, new file will cover the old file
+                  </div>
+                </template>
+              </el-upload>
 
               <!-- Type Inject Html -->
               <slot v-if="column.type === 'slot'" :name="column.name" :form="form" />
