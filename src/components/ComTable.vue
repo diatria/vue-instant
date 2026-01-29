@@ -2,7 +2,7 @@
 import type { Pagination, Query } from '../types'
 import type { RouteLocationRaw } from 'vue-router'
 import { onMounted, reactive, ref } from 'vue'
-import { httpDelete, httpHandleError } from '../utils/helpers'
+import { httpDelete, httpHandleError, resolveUrl } from '../utils/helpers'
 import { Delete, Edit, MoreFilled, Plus, View } from '@element-plus/icons-vue'
 import { HttpBuilder } from '../utils/http'
 
@@ -79,7 +79,7 @@ function changeSelection(values: number[]) {
 function fetchingDataFromServer() {
   loading.value = true
   http
-    .get<{ data: Pagination<Record<string, unknown>> }>(props.url, {
+    .get<{ data: Pagination<Record<string, unknown>> }>(resolveUrl(props.url), {
       params: {
         relations: props.setRelations,
         columns: props.setColumns,

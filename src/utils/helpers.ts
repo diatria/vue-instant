@@ -6,7 +6,7 @@ import axios, {
 } from 'axios'
 import dayjs from 'dayjs'
 import { ElMessage } from 'element-plus'
-import { kebabCase, snakeCase, startCase } from 'lodash'
+import { kebabCase, startCase } from 'lodash'
 import { getAppConfig } from '../config/runtimeConfig'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -91,6 +91,15 @@ export function getInitials(name: string): string {
 }
 
 // # Index H
+
+/**
+ * Untuk mendeteksi apakah text mengandung http atau https
+ * @param string url
+ * @returns string url
+ */
+export function hasHttpProtocol(url: string) {
+  return /^https?:\/\//i.test(url)
+}
 
 export function httpHandleError(error: AxiosError<{ message: string; code: string }>) {
   const router = useRouter()
@@ -282,6 +291,49 @@ export function replaceString(text: string, data: Record<string, unknown>) {
 }
 
 /**
+ * Resolve URL dari input yang diberikan.
+ *
+ * Function ini akan mendeteksi apakah input merupakan:
+ * 1. Absolute URL (mengandung protocol http / https)
+ *    → akan dikembalikan apa adanya tanpa modifikasi
+ * 2. Relative path / path saja
+ *    → akan digabungkan dengan `AppConfig.http.baseUrl`
+ *
+ * Contoh perilaku:
+ * - resolveUrl('https://google.com/abc')
+ *   → 'https://google.com/abc'
+ *
+ * - resolveUrl('/users')
+ *   → 'https://api.example.com/users'
+ *
+ * - resolveUrl('users/123')
+ *   → 'https://api.example.com/users/123'
+ *
+ * Catatan:
+ * - `setAppConfig()` HARUS dipanggil terlebih dahulu sebelum function ini digunakan.
+ * - Function ini hanya mendukung protocol `http` dan `https`.
+ *
+ * @param input - Absolute URL atau relative path
+ * @returns URL lengkap yang siap digunakan untuk HTTP request
+ * @throws Error jika `AppConfig.http.baseUrl` belum diset
+ */
+export function resolveUrl(input: string): string {
+  try {
+    const u = new URL(input)
+    if (u.protocol === 'http:' || u.protocol === 'https:') {
+      return input
+    }
+  } catch {}
+
+  const { http } = getAppConfig()
+  if (!http?.baseUrl) {
+    throw new Error('RuntimeConfig.http.baseUrl belum diset')
+  }
+
+  return new URL(input.replace(/^\/+/, ''), http.baseUrl).toString()
+}
+
+/**
  *
  * @param key parameter key, Ex: id
  */
@@ -291,10 +343,6 @@ export function routeParam(key: string): string | null {
 }
 
 // # S
-export function setRefreshToken(token: string) {
-  const tokenName = snakeCase(getAppConfig().token_name)
-  localStorage.setItem(`${tokenName}_refresh_token`, token)
-}
 
 export function url(text: string) {
   let replaced = text
