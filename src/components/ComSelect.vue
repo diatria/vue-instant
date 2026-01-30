@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { get } from 'lodash'
 import { computed, onMounted, ref } from 'vue'
-import { httpHandleError } from '../utils/helpers'
+import { httpHandleError, resolveUrl } from '../utils/helpers'
 import { HttpBuilder } from '../utils/http'
 
 const emit = defineEmits(['update:modelValue'])
@@ -47,7 +47,7 @@ function fetchingDataFromServer(search?: string) {
   }
 
   http
-    .get<{ data: Record<string, never>[] }>(props.url, {
+    .get<{ data: Record<string, never>[] }>(resolveUrl(props.url), {
       params,
     })
     .then((result) => {

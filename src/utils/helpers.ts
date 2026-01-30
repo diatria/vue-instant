@@ -1,9 +1,4 @@
-import axios, {
-  AxiosError,
-  type AxiosInstance,
-  type AxiosRequestConfig,
-  type AxiosResponse,
-} from 'axios'
+import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import dayjs from 'dayjs'
 import { ElMessage } from 'element-plus'
 import { kebabCase, startCase } from 'lodash'
@@ -101,12 +96,29 @@ export function hasHttpProtocol(url: string) {
   return /^https?:\/\//i.test(url)
 }
 
-export function httpHandleError(error: AxiosError<{ message: string; code: string }>) {
+export function httpHandleError(error?: unknown) {
   const router = useRouter()
-  // Handle 403 forbidden
-  if (error.response?.data.code === 'FORBIDDEN') router.push('/403')
-  if (error.response) return message(error.response.data.message || '', 'error')
-  return message(error.message, 'error')
+
+  // Jika tidak ada error, beri pesan generic
+  if (!error) return message('Unknown error', 'error')
+
+  // Jika error berasal dari Axios
+  if (axios.isAxiosError(error)) {
+    const data =
+      (error.response?.data as { message?: string; code?: string } | undefined) || undefined
+    // Handle 403 forbidden
+    if (data?.code === 'FORBIDDEN') router.push('/403')
+    if (data?.message) return message(data.message, 'error')
+    if (error.response?.statusText) return message(error.response.statusText, 'error')
+    return message(error.message || 'Unknown error', 'error')
+  }
+
+  // Error bukan Axios — bisa berupa Error, string, dll.
+  if (error instanceof Error) return message(error.message, 'error')
+  if (typeof error === 'string') return message(error, 'error')
+
+  // Fallback
+  return message('Unknown error', 'error')
 }
 
 export function httpStatusCode(status: 'OK' | 'Success' | 'Created' | 'Unauthorized') {

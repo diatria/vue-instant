@@ -6,6 +6,7 @@ import {
   httpPut,
   httpValidation,
   message,
+  resolveUrl,
 } from '../utils/helpers'
 import { Check, Close, Promotion } from '@element-plus/icons-vue'
 import type {
@@ -13,7 +14,6 @@ import type {
   FormRules,
   UploadFile,
   UploadInstance,
-  UploadProps,
   UploadRawFile,
 } from 'element-plus'
 import { genFileId } from 'element-plus'
@@ -66,14 +66,14 @@ interface ComFormProps {
   columns: Column[]
   id?: number
   description?: string
-  fetchUrl?: string
+  fetchUrl?: string // only for fetch data
   paramsUrl?: string
   queries?: Query
   relations?: string[]
   rules?: FormRules
-  storeUrl?: string
+  storeUrl?: string // for store or update data
   title?: string
-  url: string
+  url: string // for all fetch, store or update
 }
 
 const props = defineProps<ComFormProps>()
@@ -97,7 +97,7 @@ function columnGrid(
  */
 
 function getData() {
-  const url = props.fetchUrl ?? props.url
+  const url = resolveUrl(props.fetchUrl ?? props.url)
   httpGet<{ data: unknown }>(`${url}/${props.id}`, {
     params: {
       queries: props.queries,
@@ -172,7 +172,7 @@ async function store() {
   // Validation form input
   if (!ruleFormRef.value) return
 
-  const url = props.storeUrl ?? props.url
+  const url = resolveUrl(props.storeUrl ?? props.url)
   await ruleFormRef.value.validate(async (valid) => {
     let paramsUrl = ''
     if (props.paramsUrl) paramsUrl = `?${props.paramsUrl}`
@@ -191,7 +191,7 @@ async function store() {
           })
           .catch(httpHandleError)
       } catch (error) {
-        httpHandleError(error as any)
+        httpHandleError(error)
       }
     }
   })

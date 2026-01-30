@@ -129,7 +129,7 @@ function remove() {
   const ids = dataSelected.value.map((item) => {
     return (item as { id: number | string }).id
   })
-  httpDelete(`${props.deleteUrl}`, {
+  httpDelete(resolveUrl(props.deleteUrl), {
     data: {
       id: ids,
     },
