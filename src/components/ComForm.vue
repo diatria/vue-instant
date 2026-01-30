@@ -172,17 +172,16 @@ async function store() {
   // Validation form input
   if (!ruleFormRef.value) return
 
-  const url = resolveUrl(props.storeUrl ?? props.url)
+  let url = resolveUrl(props.storeUrl ?? props.url)
   await ruleFormRef.value.validate(async (valid) => {
-    let paramsUrl = ''
-    if (props.paramsUrl) paramsUrl = `?${props.paramsUrl}`
+    if (props.paramsUrl) url = `${url}?${props.paramsUrl}`
     if (valid) {
       try {
         // Upload all files first
         await submitAllUploads()
 
         // Then submit the form
-        httpPost(`${url}${paramsUrl}`, form)
+        httpPost(url, form)
           .then((result) => {
             if (httpValidation(result)) {
               message(result.data.message, 'success')
@@ -200,10 +199,12 @@ async function store() {
 async function update() {
   if (!ruleFormRef.value) return
 
-  const url = props.storeUrl ?? props.url
+  let url = resolveUrl(props.storeUrl ?? props.url)
+  url = `${url}/${props.id}`
+  if (props.paramsUrl) url = `${url}?${props.paramsUrl}`
   await ruleFormRef.value.validate((valid) => {
     if (valid) {
-      httpPut(`${url}/${props.id}?${props.paramsUrl}`, form)
+      httpPut(url, form)
         .then((result) => {
           if (httpValidation(result)) {
             message(result.data.message, 'success')
