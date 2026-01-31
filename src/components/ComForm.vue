@@ -84,7 +84,7 @@ interface ComFormProps {
 const props = defineProps<ComFormProps>()
 const emits = defineEmits(['back', 'onStored', 'onUpdated', 'delete', 'form'])
 
-const form: Record<string, string | number | UploadInstance> = reactive({})
+const form: Record<string, string | number | UploadInstance | Array<string | number>> = reactive({})
 const ruleFormRef = ref<FormInstance>()
 const uploadRefs: Record<string, UploadInstance> = {}
 
@@ -143,7 +143,7 @@ function initializeForm() {
     } else if (column.type === 'switch') {
       form[column.name] = column.value ?? 0
     } else if (column.type === 'checkbox') {
-      form[column.name] = column.value ?? 0
+      form[column.name] = column.value ?? []
     } else if (column.type === 'slot') {
       form[column.name] = column.value ?? ''
     } else if (column.type === 'hide') {
@@ -266,7 +266,7 @@ defineExpose({
             :xl="columnGrid(column.grid ?? 24, 'xl')"
           >
             <el-form-item
-              v-if="!['checkbox', 'slot:el-form-item'].includes(column.type)"
+              v-if="!['slot:el-form-item'].includes(column.type)"
               :label="column.label"
               :prop="column.name"
             >
@@ -311,6 +311,18 @@ defineExpose({
                   radio.label
                 }}</el-radio>
               </el-radio-group>
+
+              <!-- Checkbox -->
+              <el-checkbox-group
+                v-if="column.type === 'checkbox' && column.options?.length"
+                v-model="form[column.name]"
+              >
+                <el-checkbox
+                  v-for="checkbox in column.options"
+                  :label="checkbox.label"
+                  :value="checkbox.value"
+                />
+              </el-checkbox-group>
 
               <!-- Type Password -->
               <el-input
@@ -384,7 +396,8 @@ defineExpose({
               <slot v-if="column.type === 'slot'" :name="column.name" :form="form" />
             </el-form-item>
 
-            <el-form-item v-if="['checkbox'].includes(column.type)" :prop="column.name">
+            <!-- Checkbox without label -->
+            <el-form-item v-if="column.type === 'checkbox' && !column.options" :prop="column.name">
               <el-checkbox
                 v-if="column.type === 'checkbox'"
                 v-model="form[column.name]"
