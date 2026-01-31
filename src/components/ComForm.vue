@@ -39,6 +39,7 @@ type ColumnType =
   | 'text'
   | 'textarea'
   | 'select'
+  | 'radio'
   | 'password'
   | 'switch'
   | 'checkbox'
@@ -58,6 +59,10 @@ interface Column {
   value?: string | number | UploadInstance
   disabled?: boolean
   select?: ColumnSelect
+  options?: {
+    value: string
+    label: string
+  }[]
   upload?: ColumnUpload
   placeholder?: string
 }
@@ -299,6 +304,13 @@ defineExpose({
                 :url="column.select?.url"
                 @change="onChange"
               />
+
+              <!-- Radio -->
+              <el-radio-group v-if="column.type === 'radio'" v-model="form[column.name]">
+                <el-radio v-for="radio in column.options" :value="radio.value">{{
+                  radio.label
+                }}</el-radio>
+              </el-radio-group>
 
               <!-- Type Password -->
               <el-input
