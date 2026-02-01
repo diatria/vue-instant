@@ -82,7 +82,7 @@ interface ComFormProps {
 }
 
 const props = defineProps<ComFormProps>()
-const emits = defineEmits(['back', 'onStored', 'onUpdated', 'delete', 'form'])
+const emits = defineEmits(['back', 'onStored', 'onUpdated', 'delete', 'form', 'onChangeItem'])
 
 const form: Record<string, string | number | UploadInstance | Array<string | number>> = reactive({})
 const ruleFormRef = ref<FormInstance>()
@@ -134,6 +134,8 @@ function initializeForm() {
   props.columns.forEach((column) => {
     if (column.type === 'select') {
       form[column.name] = column.value ?? ''
+    } else if (column.type === 'radio') {
+      form[column.name] = column.value ?? ''
     } else if (column.type === 'text') {
       form[column.name] = column.value ?? ''
     } else if (column.type === 'textarea') {
@@ -144,6 +146,10 @@ function initializeForm() {
       form[column.name] = column.value ?? 0
     } else if (column.type === 'checkbox') {
       form[column.name] = column.value ?? []
+    } else if (column.type === 'date') {
+      form[column.name] = column.value ?? ''
+    } else if (column.type === 'date-time') {
+      form[column.name] = column.value ?? ''
     } else if (column.type === 'slot') {
       form[column.name] = column.value ?? ''
     } else if (column.type === 'hide') {
@@ -152,8 +158,9 @@ function initializeForm() {
   })
 }
 
-function onChange() {
+function onChange(columnMetaData: any, inputValue: any) {
   emits('form', form)
+  emits('onChangeItem', { ...columnMetaData, value: inputValue })
 }
 
 /**
@@ -276,7 +283,7 @@ defineExpose({
                 v-model="form[column.name]"
                 :disabled="column.disabled"
                 :placeholder="column.placeholder"
-                @change="onChange"
+                @change="(val: any) => onChange(column, val)"
               />
 
               <!-- Type Textarea -->
@@ -286,7 +293,7 @@ defineExpose({
                 type="textarea"
                 :disabled="column.disabled"
                 :placeholder="column.placeholder"
-                @change="onChange"
+                @change="(val: any) => onChange(column, val)"
               />
 
               <!-- Type Select -->
@@ -302,11 +309,15 @@ defineExpose({
                 :placeholder="column.placeholder"
                 :remote="column.select?.remote"
                 :url="column.select?.url"
-                @change="onChange"
+                @change="(val: any) => onChange(column, val)"
               />
 
               <!-- Radio -->
-              <el-radio-group v-if="column.type === 'radio'" v-model="form[column.name]">
+              <el-radio-group
+                v-if="column.type === 'radio'"
+                v-model="form[column.name]"
+                @change="(val: any) => onChange(column, val)"
+              >
                 <el-radio v-for="radio in column.options" :value="radio.value">{{
                   radio.label
                 }}</el-radio>
@@ -316,6 +327,7 @@ defineExpose({
               <el-checkbox-group
                 v-if="column.type === 'checkbox' && column.options?.length"
                 v-model="form[column.name]"
+                @change="(val: any) => onChange(column, val)"
               >
                 <el-checkbox
                   v-for="checkbox in column.options"
@@ -329,7 +341,7 @@ defineExpose({
                 v-if="column.type === 'password'"
                 v-model="form[column.name]"
                 :placeholder="column.placeholder"
-                @change="onChange"
+                @change="(val: any) => onChange(column, val)"
                 type="password"
                 show-password
               />
@@ -338,7 +350,7 @@ defineExpose({
               <el-switch
                 v-if="column.type === 'switch'"
                 v-model="form[column.name]"
-                @change="onChange"
+                @change="(val: any) => onChange(column, val)"
                 :active-icon="Check"
                 :inactive-icon="Close"
               />
@@ -347,6 +359,7 @@ defineExpose({
               <el-date-picker
                 v-if="column.type === 'date'"
                 v-model="form[column.name]"
+                @change="(val: any) => onChange(column, val)"
                 type="date"
                 :placeholder="column.placeholder"
               />
@@ -355,6 +368,7 @@ defineExpose({
               <el-date-picker
                 v-if="column.type === 'date-time'"
                 v-model="form[column.name]"
+                @change="(val: any) => onChange(column, val)"
                 type="datetime"
                 :placeholder="column.placeholder"
                 value-format="YYYY-MM-DD HH:mm:ss"
@@ -365,6 +379,7 @@ defineExpose({
                 v-if="column.type === 'time'"
                 v-model="form[column.name]"
                 :placeholder="column.placeholder"
+                @change="(val: any) => onChange(column, val)"
                 value-format="HH:mm:ss"
                 class="!w-full"
               />
@@ -381,6 +396,7 @@ defineExpose({
                 :limit="1"
                 :on-exceed="(files: File[]) => handleExceed(files, [], column.name)"
                 :auto-upload="false"
+                @change="(val: any) => onChange(column, val)"
               >
                 <template #trigger>
                   <el-button type="primary">select file</el-button>
@@ -401,7 +417,7 @@ defineExpose({
               <el-checkbox
                 v-if="column.type === 'checkbox'"
                 v-model="form[column.name]"
-                @change="onChange"
+                @change="(val: any) => onChange(column, val)"
                 :label="column.label"
               />
             </el-form-item>
