@@ -158,7 +158,7 @@ function initializeForm() {
   })
 }
 
-function onChange(columnMetaData: any, inputValue: any) {
+function onChange(columnMetaData: Column, inputValue: unknown) {
   emits('form', form)
   emits('onChangeItem', { ...columnMetaData, value: inputValue })
 }
@@ -318,9 +318,12 @@ defineExpose({
                 v-model="form[column.name]"
                 @change="(val: any) => onChange(column, val)"
               >
-                <el-radio v-for="radio in column.options" :value="radio.value">{{
-                  radio.label
-                }}</el-radio>
+                <el-radio
+                  v-for="(radio, index) in column.options"
+                  :value="radio.value"
+                  :key="`radio-${index}`"
+                  >{{ radio.label }}</el-radio
+                >
               </el-radio-group>
 
               <!-- Checkbox -->
@@ -330,9 +333,10 @@ defineExpose({
                 @change="(val: any) => onChange(column, val)"
               >
                 <el-checkbox
-                  v-for="checkbox in column.options"
+                  v-for="(checkbox, index) in column.options"
                   :label="checkbox.label"
                   :value="checkbox.value"
+                  :key="`checkbox-${index}`"
                 />
               </el-checkbox-group>
 
