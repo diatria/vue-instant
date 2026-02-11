@@ -1,3 +1,4 @@
+import { getAppConfig } from '../config/runtimeConfig'
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 
 export type HttpOptions = {
@@ -7,7 +8,7 @@ export type HttpOptions = {
 }
 
 export class HttpBuilder {
-  private base_path = ''
+  private base_path = getAppConfig().http?.baseUrl ?? ''
   private token?: string
   private with_credentials = true
 
