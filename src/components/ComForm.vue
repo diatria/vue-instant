@@ -42,6 +42,7 @@ type ColumnType =
   | 'radio'
   | 'password'
   | 'switch'
+  | 'checkbox:label'
   | 'checkbox'
   | 'date'
   | 'date-time'
@@ -60,7 +61,7 @@ interface Column {
   disabled?: boolean
   select?: ColumnSelect
   options?: {
-    value: string
+    value: string | number | boolean
     label: string
   }[]
   upload?: ColumnUpload
@@ -328,7 +329,7 @@ defineExpose({
 
               <!-- Checkbox -->
               <el-checkbox-group
-                v-if="column.type === 'checkbox' && column.options?.length"
+                v-if="column.type === 'checkbox:label' && column.options?.length"
                 v-model="form[column.name]"
                 @change="(val: any) => onChange(column, val)"
               >
@@ -373,9 +374,10 @@ defineExpose({
                 v-if="column.type === 'date-time'"
                 v-model="form[column.name]"
                 @change="(val: any) => onChange(column, val)"
-                type="datetime"
                 :placeholder="column.placeholder"
+                type="datetime"
                 value-format="YYYY-MM-DD HH:mm:ss"
+                class="w-full!"
               />
 
               <!-- Type Time -->
@@ -385,7 +387,7 @@ defineExpose({
                 :placeholder="column.placeholder"
                 @change="(val: any) => onChange(column, val)"
                 value-format="HH:mm:ss"
-                class="!w-full"
+                class="w-full!"
               />
 
               <!-- Type File Upload -->
@@ -422,7 +424,6 @@ defineExpose({
                 v-if="column.type === 'checkbox'"
                 v-model="form[column.name]"
                 @change="(val: any) => onChange(column, val)"
-                :label="column.label"
               />
             </el-form-item>
 
