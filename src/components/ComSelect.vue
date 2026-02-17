@@ -83,6 +83,7 @@ defineExpose({
     @change="(val: any) => emit('update:modelValue', val)"
     :placeholder="props.placeholder ?? 'Select'"
     filterable
+    clearable
   >
     <template v-if="typeof fieldLabel === 'string'">
       <el-option
