@@ -155,7 +155,7 @@ defineExpose({ changeSelection, refresh, remove })
       <!-- Title -->
       <div v-if="!$slots.title">
         <div class="text-xl font-bold">{{ props.title }}</div>
-        <div>{{ props.description }}</div>
+        <div class="text-sm text-gray-400">{{ props.description }}</div>
       </div>
       <slot name="title"></slot>
 
@@ -171,12 +171,11 @@ defineExpose({ changeSelection, refresh, remove })
           @click="dialogDeleteConfirmation = true"
           :icon="Delete"
           type="danger"
-          class="!m-0"
+          class="m-0!"
           >Hapus</el-button
         >
         <slot name="buttonDelete"></slot>
         <slot name="toolbar-3"></slot>
-        <el-button v-if="props.buttonFilterShow" class="!m-0">Filter</el-button>
         <slot name="toolbar-4"></slot>
       </div>
     </div>
