@@ -19,4 +19,4 @@ module.exports = {
     'prettier/prettier': ['error'], // Error jika tidak sesuai format prettier
     // Bisa override rules ESLint lain di sini
   },
-};
+}

@@ -1,7 +1,7 @@
-import { defineConfig } from 'vite';
-import vue from '@vitejs/plugin-vue';
-import dts from 'vite-plugin-dts';
-import { fileURLToPath, URL } from 'node:url';
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import dts from 'vite-plugin-dts'
+import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
   plugins: [
@@ -20,7 +20,7 @@ export default defineConfig({
     lib: {
       entry: 'src/index.ts',
       name: 'VueInstant',
-      fileName: format => `vue-instant.${format}.js`,
+      fileName: (format) => `vue-instant.${format}.js`,
       formats: ['es', 'umd'],
     },
     rollupOptions: {
@@ -38,4 +38,4 @@ export default defineConfig({
     sourcemap: true,
     minify: false,
   },
-});
+})
