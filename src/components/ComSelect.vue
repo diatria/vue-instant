@@ -14,6 +14,7 @@ const props = defineProps<{
   fieldSearchColumn?: string
   options?: Array<unknown>
   placeholder?: string
+  placement?: string
   remote?: boolean
   url?: string
 }>()
@@ -80,8 +81,9 @@ defineExpose({
     :remote="props.remote"
     :remote-method="fetchingDataFromServer"
     :loading="fetchLoading"
-    @change="(val: any) => emit('update:modelValue', val)"
     :placeholder="props.placeholder ?? 'Select'"
+    :placement="props.placement ?? 'bottom'"
+    @change="(val: any) => emit('update:modelValue', val)"
     filterable
     clearable
   >
