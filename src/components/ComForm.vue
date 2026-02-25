@@ -20,6 +20,7 @@ import { genFileId } from 'element-plus'
 import { onBeforeMount, onMounted, reactive, ref } from 'vue'
 import ComSelect from './ComSelect.vue'
 import type { Query } from '../types'
+import { get } from 'lodash'
 
 type ColumnSelect = {
   options?: Array<unknown>
@@ -57,7 +58,7 @@ interface Column {
   label?: string
   type: ColumnType
   grid?: number | Record<string, number>
-  value?: string | number | UploadInstance
+  value?: string | number | UploadInstance | (() => string)
   disabled?: boolean
   select?: ColumnSelect
   options?: {
@@ -85,7 +86,10 @@ interface ComFormProps {
 const props = defineProps<ComFormProps>()
 const emits = defineEmits(['back', 'onStored', 'onUpdated', 'delete', 'form', 'onChangeItem'])
 
-const form: Record<string, string | number | UploadInstance | Array<string | number>> = reactive({})
+const form: Record<
+  string,
+  string | number | UploadInstance | Array<string | number> | (() => string)
+> = reactive({})
 const ruleFormRef = ref<FormInstance>()
 const uploadRefs: Record<string, UploadInstance> = {}
 
@@ -112,6 +116,12 @@ function getData() {
   })
     .then((result) => {
       Object.assign(form, result.data.data)
+
+      props.columns.forEach((column) => {
+        if (typeof column.value === 'function') {
+          form[column.name] = get(result.data.data, column.value(), '')
+        }
+      })
       emits('form', result.data.data)
     })
     .catch(httpHandleError)
