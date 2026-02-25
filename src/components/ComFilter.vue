@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { ComFormColumn } from '@/types'
-import { UploadInstance } from 'element-plus'
+import { type ComFormColumn } from '../types'
+import { type UploadInstance } from 'element-plus'
 import { Check, Close, Promotion, RefreshLeft } from '@element-plus/icons-vue'
 import { reactive, ref, nextTick } from 'vue'
 import ComSelect from './ComSelect.vue'

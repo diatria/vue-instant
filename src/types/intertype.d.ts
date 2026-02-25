@@ -12,7 +12,7 @@ export interface Pagination<T> {
   total: number
 }
 
-type ComSelectProps = {
+export interface ComSelectProps {
   options?: Array<unknown>
   url?: string
   field_label?: string | ((row: Record<string, unknown>) => string)
@@ -22,11 +22,11 @@ type ComSelectProps = {
   remote?: boolean
 }
 
-type ComFormColumnUpload = {
+export interface ComFormColumnUpload {
   url: string
 }
 
-type ComFormColumnType =
+export type ComFormColumnType =
   | 'text'
   | 'textarea'
   | 'select'
