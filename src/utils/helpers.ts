@@ -6,22 +6,43 @@ import { getAppConfig } from '../config/runtimeConfig'
 import { useRoute, useRouter } from 'vue-router'
 
 // # INDEX B
+/**
+ * Formats a date string into a beautiful, readable format.
+ * @param date - The date string to format. If undefined, returns '-'.
+ * @param format - Optional custom format string. Defaults to 'DD MMM YYYY'.
+ * @returns The formatted date string.
+ */
 export function beautyDate(date: string | undefined, format?: string) {
   if (date === undefined) return '-'
   if (format) return dayjs(date).format(format)
   return dayjs(date).format('DD MMM YYYY')
 }
 
+/**
+ * Formats a date string into a beautiful date and time format.
+ * @param date - The date string to format.
+ * @returns The formatted date and time string in 'DD MMM YYYY HH:mm' format.
+ */
 export function beautyDateTime(date: string) {
   return dayjs(date).format('DD MMM YYYY HH:mm')
 }
 
 // # INDEX C
+/**
+ * Logs data to the console with an optional label.
+ * @param data - The data to log.
+ * @param label - Optional label to prefix the log.
+ */
 export function csl(data: unknown, label?: string) {
   if (label) console.log(label, data)
   else console.log(data)
 }
 
+/**
+ * Converts a string or number to a hex-encoded string with a 'csl:' prefix.
+ * @param input - The input string or number to convert.
+ * @returns The hex-encoded string.
+ */
 export function convertStringToHex(input: string | number) {
   const value = typeof input === 'number' ? input.toString() : input
   return Array.from(`csl:${value}`)
@@ -29,6 +50,11 @@ export function convertStringToHex(input: string | number) {
     .join('')
 }
 
+/**
+ * Converts a hex-encoded string back to the original string, removing the 'csl:' prefix.
+ * @param input - The hex-encoded string to convert.
+ * @returns The decoded string.
+ */
 export function convertHexToString(input: string) {
   let output = ''
   for (let i = 0; i < input.length; i += 2) {
@@ -38,6 +64,11 @@ export function convertHexToString(input: string) {
 }
 
 // # Index D
+/**
+ * Returns a default value based on the given type.
+ * @param type - The type string ('text', 'date', 'dateTime', 'number').
+ * @returns The default value: empty string for text/date types, 0 for number.
+ */
 export function defaultType(type: string) {
   if (['text', 'date', 'dateTime'].includes(type)) return ''
   if (type === 'number') return 0
@@ -45,6 +76,10 @@ export function defaultType(type: string) {
 
 // # Index G
 
+/**
+ * Detects the browser type based on the user agent.
+ * @returns The name of the browser.
+ */
 export function getBrowserType() {
   const test = (regexp: RegExp) => {
     return regexp.test(navigator.userAgent)
@@ -121,15 +156,20 @@ export function httpHandleError(error?: unknown) {
   return message('Unknown error', 'error')
 }
 
-export function httpStatusCode(status: 'OK' | 'Success' | 'Created' | 'Unauthorized') {
+export function httpStatusCode(status: 'OK' | 'Success' | 'Created' | 'Unauthorized' | 'Forbidden') {
   if (status === 'OK') return 200
   if (status === 'Success') return 200
   if (status === 'Created') return 201
   if (status === 'Unauthorized') return 401
-  if (status === 'Unauthorized') return 403
+  if (status === 'Forbidden') return 403
   return 404
 }
 
+/**
+ * Validates an HTTP response based on status code.
+ * @param response - The Axios response object.
+ * @returns True if the status is a success code (200, 201), false otherwise.
+ */
 export function httpValidation(response: AxiosResponse): boolean {
   const httpResponse = [
     { code: 200, message: 'OK', type: 'success' },
@@ -148,6 +188,11 @@ export function httpValidation(response: AxiosResponse): boolean {
   return false
 }
 
+/**
+ * Creates and returns an Axios instance configured for the application.
+ * @returns The configured Axios instance.
+ * @deprecated use new HttpBuilder() instead
+ */
 export function http(): AxiosInstance {
   let withCredentials = import.meta.env.VITE_DS_VUE_INSTANT_HTTP_WITH_TOKEN
   if (!withCredentials && getAppConfig()) {
@@ -165,6 +210,13 @@ export function http(): AxiosInstance {
   })
 }
 
+/**
+ * Performs a GET request using the configured Axios instance.
+ * @param url - The URL to request.
+ * @param config - Optional Axios request config.
+ * @returns A promise resolving to the Axios response.
+ * @deprecated use new HttpBuilder() instead
+ */
 export function httpGet<T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
   return new Promise((resolve, reject) => {
     http()
@@ -179,6 +231,14 @@ export function httpGet<T>(url: string, config?: AxiosRequestConfig): Promise<Ax
   })
 }
 
+/**
+ * Performs a POST request using the configured Axios instance.
+ * @param url - The URL to request.
+ * @param data - The data to send.
+ * @param config - Optional Axios request config.
+ * @returns A promise resolving to the Axios response.
+ * @deprecated use new HttpBuilder() instead
+ */
 export function httpPost(
   url: string,
   data?: unknown,
@@ -197,6 +257,13 @@ export function httpPost(
   })
 }
 
+/**
+ * Performs a DELETE request using the configured Axios instance.
+ * @param url - The URL to request.
+ * @param config - Optional Axios request config.
+ * @returns A promise resolving to the Axios response.
+ * @deprecated use new HttpBuilder() instead
+ */
 export function httpDelete(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse> {
   return new Promise((resolve, reject) => {
     http()
@@ -211,6 +278,14 @@ export function httpDelete(url: string, config?: AxiosRequestConfig): Promise<Ax
   })
 }
 
+/**
+ * Performs a PUT request using the configured Axios instance.
+ * @param url - The URL to request.
+ * @param data - The data to send.
+ * @param config - Optional Axios request config.
+ * @returns A promise resolving to the Axios response.
+ * @deprecated use new HttpBuilder() instead
+ */
 export function httpPut(
   url: string,
   data?: unknown,
@@ -229,6 +304,11 @@ export function httpPut(
   })
 }
 
+/**
+ * Converts HTML string to plain text.
+ * @param html - The HTML string to convert.
+ * @returns The plain text representation.
+ */
 export function htmlToPlainText(html: string) {
   // Create a new div element
   const tempDivElement = document.createElement('div')
@@ -239,6 +319,11 @@ export function htmlToPlainText(html: string) {
 }
 
 // # Index M
+/**
+ * Displays a message using Element Plus ElMessage.
+ * @param message - The message to display.
+ * @param type - The type of message ('success', 'warning', 'info', 'error').
+ */
 export function message(message: string, type: 'success' | 'warning' | 'info' | 'error') {
   // return message
   if (type === 'success') ElMessage.success({ grouping: true, message })
@@ -267,6 +352,13 @@ export function minuteToTime(minute: number | string, leadingZero?: boolean): st
 }
 
 // # Index N
+/**
+ * Formats a number as currency using Intl.NumberFormat.
+ * @param number - The number to format.
+ * @param locale - Optional locale string, defaults to 'id-ID'.
+ * @param options - Optional formatting options.
+ * @returns The formatted currency string.
+ */
 export function numberFormat(number: number, locale?: string, options?: Intl.NumberFormatOptions) {
   const localeDefault = 'id-ID'
   const currencyDefault = 'IDR'
@@ -278,10 +370,21 @@ export function numberFormat(number: number, locale?: string, options?: Intl.Num
 }
 
 // # Index P
+/**
+ * Converts text to Pascal case (title case).
+ * @param text - The text to convert.
+ * @returns The Pascal case string.
+ */
 export function pascalCase(text: string) {
   return startCase(text)
 }
 
+/**
+ * Replaces placeholders in a string with values from an object.
+ * @param text - The text with placeholders like {key}.
+ * @param data - The object containing replacement values.
+ * @returns The text with placeholders replaced.
+ */
 export function replaceString(text: string, data: Record<string, unknown>) {
   if (!data) return text
 
@@ -346,8 +449,9 @@ export function resolveUrl(input: string): string {
 }
 
 /**
- *
- * @param key parameter key, Ex: id
+ * Gets a route parameter by key.
+ * @param key - The parameter key.
+ * @returns The parameter value as string or null.
  */
 export function routeParam(key: string): string | null {
   const route = useRoute()
@@ -356,6 +460,11 @@ export function routeParam(key: string): string | null {
 
 // # S
 
+/**
+ * Cleans up a URL by replacing double slashes with single slashes.
+ * @param text - The URL string to clean.
+ * @returns The cleaned URL.
+ */
 export function url(text: string) {
   let replaced = text
 
@@ -365,16 +474,32 @@ export function url(text: string) {
 }
 
 // # Index U
+/**
+ * Converts text to kebab-case and prefixes with '/'.
+ * @param text - The text to convert.
+ * @returns The kebab-case URL path.
+ */
 export function urlToKebab(text: string) {
   return `/${kebabCase(text)}`
 }
 
 // # Index T
+/**
+ * Converts text to title case.
+ * @param text - The text to convert.
+ * @returns The title case string.
+ */
 export function titleCase(text: string) {
   return startCase(text)
 }
 
 // # Index W
+/**
+ * Delays the execution of a function by a specified amount of time.
+ * @param fn - The function to execute after the delay.
+ * @param delay - The delay in milliseconds, defaults to 500.
+ * @returns A promise that resolves with the function's return value.
+ */
 export function waiting<T>(fn: () => T, delay: number | null = 500): Promise<T> {
   return new Promise((resolve) => {
     setTimeout(() => {
