@@ -144,6 +144,10 @@ const handleExceed = (files: File[], uploadFiles: UploadFile[], columnName?: str
 function initializeForm() {
   props.columns.forEach((column) => {
     if (column.type === 'select') {
+      if (typeof column.value === 'function') {
+        form[column.name] = get(form, column.value(), '')
+      } else form[column.name] = column.value ?? ''
+    } else if (column.type === 'upload') {
       form[column.name] = column.value ?? ''
     } else if (column.type === 'radio') {
       form[column.name] = column.value ?? ''
