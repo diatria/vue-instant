@@ -9,16 +9,16 @@
     }
     return target;
   };
-  const _sfc_main$4 = {};
+  const _sfc_main$5 = {};
   const _hoisted_1$3 = { class: "mx-auto h-full xl:w-3/4 lg:w-1/2" };
   function _sfc_render(_ctx, _cache) {
     return vue.openBlock(), vue.createElementBlock("div", _hoisted_1$3, [
       vue.renderSlot(_ctx.$slots, "default")
     ]);
   }
-  const ComContainer = /* @__PURE__ */ _export_sfc(_sfc_main$4, [["render", _sfc_render]]);
+  const ComContainer = /* @__PURE__ */ _export_sfc(_sfc_main$5, [["render", _sfc_render]]);
   const _hoisted_1$2 = { class: "dialog-footer" };
-  const _sfc_main$3 = /* @__PURE__ */ vue.defineComponent({
+  const _sfc_main$4 = /* @__PURE__ */ vue.defineComponent({
     __name: "ComDialogConfirmation",
     props: /* @__PURE__ */ vue.mergeModels({
       message: {}
@@ -51,7 +51,6 @@
                 _: 1,
                 __: [3]
               }),
-              _cache[5] || (_cache[5] = vue.createTextVNode()),
               vue.createVNode(_component_el_button, {
                 type: "primary",
                 onClick: _cache[1] || (_cache[1] = ($event) => emit("onConfirm", true))
@@ -65,11 +64,9 @@
             ])
           ]),
           default: vue.withCtx(() => [
-            vue.createElementVNode("span", null, vue.toDisplayString(props.message), 1),
-            _cache[6] || (_cache[6] = vue.createTextVNode())
+            vue.createElementVNode("span", null, vue.toDisplayString(props.message), 1)
           ]),
-          _: 1,
-          __: [6]
+          _: 1
         }, 8, ["modelValue"]);
       };
     }
@@ -79,6 +76,9 @@
     config = cfg;
   }
   function getAppConfig() {
+    if (!config) {
+      throw new Error("RuntimeConfig belum di-set. Pastikan setAppConfig dipanggil di main.ts");
+    }
     return config;
   }
   /*!
@@ -169,34 +169,30 @@
   function getInitials(name) {
     return name.split(" ").map((word) => word[0]).join("").toUpperCase();
   }
-  function getRefreshToken() {
-    const tokenName = void 0;
-    if (!getAppConfig()) {
-      throw new Error("Token name cannot be empty");
-    }
-    const snakeCaseTokenName = lodash.snakeCase(tokenName);
-    return localStorage.getItem(`${snakeCaseTokenName}_refresh_token`) ?? "";
-  }
-  function getToken() {
-    const tokenName = void 0;
-    if (!getAppConfig()) {
-      throw new Error("Token name cannot be empty");
-    }
-    return localStorage.getItem(`access_token_${tokenName}`) ?? "";
+  function hasHttpProtocol(url2) {
+    return /^https?:\/\//i.test(url2);
   }
   function httpHandleError(error) {
-    var _a;
+    var _a, _b;
     const router = useRouter();
-    if (((_a = error.response) == null ? void 0 : _a.data.code) === "FORBIDDEN") router.push("/403");
-    if (error.response) return message(error.response.data.message || "", "error");
-    return message(error.message, "error");
+    if (!error) return message("Unknown error", "error");
+    if (axios.isAxiosError(error)) {
+      const data = ((_a = error.response) == null ? void 0 : _a.data) || void 0;
+      if ((data == null ? void 0 : data.code) === "FORBIDDEN") router.push("/403");
+      if (data == null ? void 0 : data.message) return message(data.message, "error");
+      if ((_b = error.response) == null ? void 0 : _b.statusText) return message(error.response.statusText, "error");
+      return message(error.message || "Unknown error", "error");
+    }
+    if (error instanceof Error) return message(error.message, "error");
+    if (typeof error === "string") return message(error, "error");
+    return message("Unknown error", "error");
   }
   function httpStatusCode(status) {
     if (status === "OK") return 200;
     if (status === "Success") return 200;
     if (status === "Created") return 201;
     if (status === "Unauthorized") return 401;
-    if (status === "Unauthorized") return 403;
+    if (status === "Forbidden") return 403;
     return 404;
   }
   function httpValidation(response) {
@@ -226,8 +222,9 @@
       timeout: 6e4,
       headers: {
         Accept: "application/json",
-        Authorization: `Bearer ${getToken()}`
+        Authorization: `Bearer `
       },
+      baseURL: void 0,
       withCredentials: withCredentials ?? true
     });
   }
@@ -292,10 +289,6 @@
   function pascalCase(text) {
     return lodash.startCase(text);
   }
-  function removeRefreshToken() {
-    const tokenName = lodash.snakeCase(getAppConfig().token_name);
-    localStorage.removeItem(`${tokenName}_refresh_token`);
-  }
   function replaceString(text, data) {
     if (!data) return text;
     const regex = /\{(\w+?)\}/g;
@@ -310,14 +303,24 @@
     });
     return finalText ?? "";
   }
+  function resolveUrl(input) {
+    try {
+      const u = new URL(input);
+      if (u.protocol === "http:" || u.protocol === "https:") {
+        return input;
+      }
+    } catch {
+    }
+    const { http: http2 } = getAppConfig();
+    if (!(http2 == null ? void 0 : http2.baseUrl)) {
+      throw new Error("RuntimeConfig.http.baseUrl belum diset");
+    }
+    return new URL(input.replace(/^\/+/, ""), http2.baseUrl).toString();
+  }
   function routeParam(key) {
     var _a;
     const route = useRoute();
     return ((_a = route.params[key]) == null ? void 0 : _a.toString()) || null;
-  }
-  function setRefreshToken(token) {
-    const tokenName = lodash.snakeCase(getAppConfig().token_name);
-    localStorage.setItem(`${tokenName}_refresh_token`, token);
   }
   function url(text) {
     let replaced = text;
@@ -370,6 +373,22 @@
     }
   });
   var close_default = close_vue_vue_type_script_setup_true_lang_default;
+  var delete_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ vue.defineComponent({
+    name: "Delete",
+    __name: "delete",
+    setup(__props) {
+      return (_ctx, _cache) => (vue.openBlock(), vue.createElementBlock("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "0 0 1024 1024"
+      }, [
+        vue.createElementVNode("path", {
+          fill: "currentColor",
+          d: "M160 256H96a32 32 0 0 1 0-64h256V95.936a32 32 0 0 1 32-32h256a32 32 0 0 1 32 32V192h256a32 32 0 1 1 0 64h-64v672a32 32 0 0 1-32 32H192a32 32 0 0 1-32-32zm448-64v-64H416v64zM224 896h576V256H224zm192-128a32 32 0 0 1-32-32V416a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32m192 0a32 32 0 0 1-32-32V416a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32"
+        })
+      ]));
+    }
+  });
+  var delete_default = delete_vue_vue_type_script_setup_true_lang_default;
   var edit_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ vue.defineComponent({
     name: "Edit",
     __name: "edit",
@@ -406,6 +425,22 @@
     }
   });
   var more_filled_default = more_filled_vue_vue_type_script_setup_true_lang_default;
+  var plus_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ vue.defineComponent({
+    name: "Plus",
+    __name: "plus",
+    setup(__props) {
+      return (_ctx, _cache) => (vue.openBlock(), vue.createElementBlock("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "0 0 1024 1024"
+      }, [
+        vue.createElementVNode("path", {
+          fill: "currentColor",
+          d: "M480 480V128a32 32 0 0 1 64 0v352h352a32 32 0 1 1 0 64H544v352a32 32 0 1 1-64 0V544H128a32 32 0 0 1 0-64z"
+        })
+      ]));
+    }
+  });
+  var plus_default = plus_vue_vue_type_script_setup_true_lang_default;
   var promotion_vue_vue_type_script_setup_true_lang_default = /* @__PURE__ */ vue.defineComponent({
     name: "Promotion",
     __name: "promotion",
@@ -438,18 +473,91 @@
     }
   });
   var view_default = view_vue_vue_type_script_setup_true_lang_default;
-  const _sfc_main$2 = /* @__PURE__ */ vue.defineComponent({
+  class HttpBuilder {
+    constructor() {
+      var _a;
+      this.base_path = ((_a = getAppConfig().http) == null ? void 0 : _a.baseUrl) ?? "";
+      this.with_credentials = true;
+      this.instance = null;
+    }
+    // ========================
+    // Builder Methods (Chainable)
+    // ========================
+    basePath(path) {
+      this.base_path = path;
+      return this;
+    }
+    setToken(token) {
+      this.token = token;
+      return this;
+    }
+    withCredentials(enable) {
+      this.with_credentials = enable;
+      return this;
+    }
+    // ========================
+    // Build Axios Instance
+    // ========================
+    build() {
+      if (!this.instance) {
+        this.instance = axios.create({
+          baseURL: this.base_path,
+          timeout: 6e4,
+          withCredentials: this.with_credentials,
+          headers: {
+            Accept: "application/json",
+            ...this.token && { Authorization: `Bearer ${this.token}` }
+          }
+        });
+      }
+      return this.instance;
+    }
+    // ========================
+    // HTTP Methods
+    // ========================
+    get(url2, config2) {
+      return this.build().get(url2, config2);
+    }
+    post(url2, data, config2) {
+      return this.build().post(url2, data, config2);
+    }
+    put(url2, data, config2) {
+      return this.build().put(url2, data, config2);
+    }
+    patch(url2, data, config2) {
+      return this.build().patch(url2, data, config2);
+    }
+    delete(url2, config2) {
+      return this.build().delete(url2, config2);
+    }
+    head(url2, config2) {
+      return this.build().head(url2, config2);
+    }
+    options(url2, config2) {
+      return this.build().options(url2, config2);
+    }
+    // ========================
+    // Optional Interceptor Helper
+    // ========================
+    addInterceptor(onSuccess, onError) {
+      this.build().interceptors.response.use(onSuccess, onError);
+      return this;
+    }
+  }
+  const _sfc_main$3 = /* @__PURE__ */ vue.defineComponent({
     __name: "ComSelect",
     props: {
+      modelValue: {},
       disabled: { type: Boolean },
-      fetchOnClick: { type: Boolean },
-      fieldLabel: { type: [String, Function] },
-      fieldValue: {},
-      fieldSearchColumn: {},
+      fetchOnClick: { type: Boolean, default: true },
       options: {},
+      url: {},
+      field_label: {},
+      field_value: {},
+      field_search_column: {},
       placeholder: {},
-      remote: { type: Boolean },
-      url: {}
+      placement: {},
+      remote: { type: Boolean }
     },
     emits: ["update:modelValue"],
     setup(__props, { expose: __expose, emit: __emit }) {
@@ -457,10 +565,14 @@
       const props = __props;
       const collections = vue.ref([]);
       const fetchLoading = vue.ref(false);
-      const value = vue.ref("");
-      const fieldLabel = vue.computed(() => props.fieldLabel ?? "name");
-      const fieldValue = vue.computed(() => props.fieldValue ?? "id");
-      const fieldSearchColumn = vue.computed(() => props.fieldSearchColumn ?? fieldLabel.value);
+      const http2 = new HttpBuilder();
+      const fieldLabel = vue.computed(() => props.field_label ?? "name");
+      const fieldValue = vue.computed(() => props.field_value ?? "id");
+      const fieldSearchColumn = vue.computed(() => props.field_search_column ?? fieldLabel.value);
+      const value = vue.computed({
+        get: () => props.modelValue,
+        set: (val) => emit("update:modelValue", val)
+      });
       function changeCollection(values) {
         collections.value = values;
       }
@@ -474,7 +586,7 @@
             queries: [{ field: fieldSearchColumn.value, value: search }]
           };
         }
-        httpGet(props.url, {
+        http2.get(resolveUrl(props.url), {
           params
         }).then((result) => {
           fetchLoading.value = false;
@@ -484,6 +596,14 @@
           fetchLoading.value = false;
         });
       }
+      vue.watch(
+        () => props.options,
+        (newOptions) => {
+          if (newOptions) {
+            collections.value = newOptions;
+          }
+        }
+      );
       vue.onMounted(() => {
         if (props.url && (props.fetchOnClick ?? true)) fetchingDataFromServer();
         if (props.options) collections.value = props.options;
@@ -502,9 +622,10 @@
           remote: props.remote,
           "remote-method": fetchingDataFromServer,
           loading: fetchLoading.value,
-          onChange: _cache[1] || (_cache[1] = (val) => emit("update:modelValue", val)),
           placeholder: props.placeholder ?? "Select",
-          filterable: ""
+          placement: props.placement ?? "bottom",
+          filterable: "",
+          clearable: ""
         }, {
           default: vue.withCtx(() => [
             typeof fieldLabel.value === "string" ? (vue.openBlock(true), vue.createElementBlock(vue.Fragment, { key: 0 }, vue.renderList(collections.value, (item) => {
@@ -523,96 +644,280 @@
             }), 128)) : vue.createCommentVNode("", true)
           ]),
           _: 1
-        }, 8, ["modelValue", "disabled", "remote", "loading", "placeholder"]);
+        }, 8, ["modelValue", "disabled", "remote", "loading", "placeholder", "placement"]);
       };
     }
   });
-  const _hoisted_1$1 = { class: "flex justify-end border-t border-slate-200 border-solid pt-4" };
+  const _sfc_main$2 = /* @__PURE__ */ vue.defineComponent({
+    __name: "FormField",
+    props: {
+      column: {},
+      modelValue: {},
+      disabled: { type: Boolean }
+    },
+    emits: ["update:modelValue", "change"],
+    setup(__props, { emit: __emit }) {
+      const emit = __emit;
+      const handleChange = (val) => {
+        emit("update:modelValue", val);
+        emit("change", val);
+      };
+      return (_ctx, _cache) => {
+        var _a, _b, _c, _d, _e, _f, _g, _h;
+        const _component_el_input = vue.resolveComponent("el-input");
+        const _component_el_radio = vue.resolveComponent("el-radio");
+        const _component_el_radio_group = vue.resolveComponent("el-radio-group");
+        const _component_el_checkbox = vue.resolveComponent("el-checkbox");
+        const _component_el_checkbox_group = vue.resolveComponent("el-checkbox-group");
+        const _component_el_switch = vue.resolveComponent("el-switch");
+        const _component_el_date_picker = vue.resolveComponent("el-date-picker");
+        const _component_el_time_picker = vue.resolveComponent("el-time-picker");
+        return _ctx.column.type === "text" ? (vue.openBlock(), vue.createBlock(_component_el_input, {
+          key: 0,
+          "model-value": _ctx.modelValue,
+          "onUpdate:modelValue": handleChange,
+          disabled: _ctx.disabled || _ctx.column.disabled,
+          placeholder: _ctx.column.placeholder
+        }, null, 8, ["model-value", "disabled", "placeholder"])) : _ctx.column.type === "textarea" ? (vue.openBlock(), vue.createBlock(_component_el_input, {
+          key: 1,
+          "model-value": _ctx.modelValue,
+          "onUpdate:modelValue": handleChange,
+          type: "textarea",
+          disabled: _ctx.disabled || _ctx.column.disabled,
+          placeholder: _ctx.column.placeholder
+        }, null, 8, ["model-value", "disabled", "placeholder"])) : _ctx.column.type === "select" ? (vue.openBlock(), vue.createBlock(_sfc_main$3, {
+          key: 2,
+          "model-value": _ctx.modelValue,
+          "onUpdate:modelValue": handleChange,
+          disabled: _ctx.disabled || _ctx.column.disabled,
+          "fetch-on-click": (_a = _ctx.column.select) == null ? void 0 : _a.fetch_on_click,
+          "field-label": ((_b = _ctx.column.select) == null ? void 0 : _b.field_label) ?? "name",
+          "field-value": ((_c = _ctx.column.select) == null ? void 0 : _c.field_value) ?? "id",
+          "field-search-column": (_d = _ctx.column.select) == null ? void 0 : _d.field_search_column,
+          options: (_e = _ctx.column.select) == null ? void 0 : _e.options,
+          placeholder: _ctx.column.placeholder,
+          remote: (_f = _ctx.column.select) == null ? void 0 : _f.remote,
+          url: (_g = _ctx.column.select) == null ? void 0 : _g.url
+        }, null, 8, ["model-value", "disabled", "fetch-on-click", "field-label", "field-value", "field-search-column", "options", "placeholder", "remote", "url"])) : _ctx.column.type === "radio" ? (vue.openBlock(), vue.createBlock(_component_el_radio_group, {
+          key: 3,
+          "model-value": _ctx.modelValue,
+          "onUpdate:modelValue": handleChange
+        }, {
+          default: vue.withCtx(() => [
+            (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(_ctx.column.options, (radio, index) => {
+              return vue.openBlock(), vue.createBlock(_component_el_radio, {
+                value: radio.value,
+                key: `radio-${index}`
+              }, {
+                default: vue.withCtx(() => [
+                  vue.createTextVNode(vue.toDisplayString(radio.label), 1)
+                ]),
+                _: 2
+              }, 1032, ["value"]);
+            }), 128))
+          ]),
+          _: 1
+        }, 8, ["model-value"])) : _ctx.column.type === "checkbox:label" && ((_h = _ctx.column.options) == null ? void 0 : _h.length) ? (vue.openBlock(), vue.createBlock(_component_el_checkbox_group, {
+          key: 4,
+          "model-value": _ctx.modelValue,
+          "onUpdate:modelValue": handleChange
+        }, {
+          default: vue.withCtx(() => [
+            (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(_ctx.column.options, (checkbox, index) => {
+              return vue.openBlock(), vue.createBlock(_component_el_checkbox, {
+                label: checkbox.label,
+                value: checkbox.value,
+                key: `checkbox-${index}`
+              }, null, 8, ["label", "value"]);
+            }), 128))
+          ]),
+          _: 1
+        }, 8, ["model-value"])) : _ctx.column.type === "password" ? (vue.openBlock(), vue.createBlock(_component_el_input, {
+          key: 5,
+          "model-value": _ctx.modelValue,
+          "onUpdate:modelValue": handleChange,
+          placeholder: _ctx.column.placeholder,
+          type: "password",
+          "show-password": ""
+        }, null, 8, ["model-value", "placeholder"])) : _ctx.column.type === "switch" ? (vue.openBlock(), vue.createBlock(_component_el_switch, {
+          key: 6,
+          "model-value": _ctx.modelValue,
+          "onUpdate:modelValue": handleChange,
+          "active-icon": vue.unref(check_default),
+          "inactive-icon": vue.unref(close_default)
+        }, null, 8, ["model-value", "active-icon", "inactive-icon"])) : _ctx.column.type === "date" ? (vue.openBlock(), vue.createBlock(_component_el_date_picker, {
+          key: 7,
+          "model-value": _ctx.modelValue,
+          "onUpdate:modelValue": handleChange,
+          type: "date",
+          placeholder: _ctx.column.placeholder
+        }, null, 8, ["model-value", "placeholder"])) : _ctx.column.type === "date-time" ? (vue.openBlock(), vue.createBlock(_component_el_date_picker, {
+          key: 8,
+          "model-value": _ctx.modelValue,
+          "onUpdate:modelValue": handleChange,
+          placeholder: _ctx.column.placeholder,
+          type: "datetime",
+          "value-format": "YYYY-MM-DD HH:mm:ss",
+          class: "w-full!"
+        }, null, 8, ["model-value", "placeholder"])) : _ctx.column.type === "time" ? (vue.openBlock(), vue.createBlock(_component_el_time_picker, {
+          key: 9,
+          "model-value": _ctx.modelValue,
+          "onUpdate:modelValue": handleChange,
+          placeholder: _ctx.column.placeholder,
+          "value-format": "HH:mm:ss",
+          class: "w-full!"
+        }, null, 8, ["model-value", "placeholder"])) : _ctx.column.type === "checkbox" && !_ctx.column.options ? (vue.openBlock(), vue.createBlock(_component_el_checkbox, {
+          key: 10,
+          "model-value": _ctx.modelValue,
+          "onUpdate:modelValue": handleChange
+        }, null, 8, ["model-value"])) : _ctx.column.type === "slot" ? vue.renderSlot(_ctx.$slots, "default", {
+          key: 11,
+          column: _ctx.column,
+          modelValue: _ctx.modelValue
+        }) : vue.createCommentVNode("", true);
+      };
+    }
+  });
+  const _hoisted_1$1 = { class: "flex justify-between p-4 border-b border-[#ebeef5]" };
+  const _hoisted_2$1 = { key: 0 };
+  const _hoisted_3$1 = { class: "text-xl font-bold" };
+  const _hoisted_4$1 = { class: "flex justify-end border-t border-slate-200 border-solid pt-4" };
   const _sfc_main$1 = /* @__PURE__ */ vue.defineComponent({
     __name: "ComForm",
     props: {
       columns: {},
       id: {},
+      description: {},
       fetchUrl: {},
       paramsUrl: {},
       queries: {},
       relations: {},
       rules: {},
       storeUrl: {},
+      title: {},
       url: {}
     },
-    emits: ["back", "onStored", "onUpdated", "delete", "form"],
+    emits: ["back", "onStored", "onUpdated", "delete", "form", "onChangeItem"],
     setup(__props, { expose: __expose, emit: __emit }) {
       const props = __props;
       const emits = __emit;
       const form = vue.reactive({});
       const ruleFormRef = vue.ref();
+      const uploadRefs = {};
+      const loading = vue.ref(false);
+      const http2 = new HttpBuilder();
       function columnGrid(column, breakPoint) {
         if (typeof column === "number") return column;
         if (typeof column === "object" && breakPoint) return column[breakPoint];
         if (typeof column === "object") return column["default"];
       }
       function getData() {
-        const url2 = props.fetchUrl ?? props.url;
-        httpGet(`${url2}/${props.id}`, {
+        const url2 = resolveUrl(props.fetchUrl ?? props.url);
+        http2.get(`${url2}/${props.id}`, {
           params: {
             queries: props.queries,
             relations: props.relations
           }
         }).then((result) => {
           Object.assign(form, result.data.data);
+          props.columns.forEach((column) => {
+            if (typeof column.value === "function") {
+              form[column.name] = lodash.get(result.data.data, column.value(), "");
+            }
+          });
           emits("form", result.data.data);
         }).catch(httpHandleError);
       }
+      const handleExceed = (files, uploadFiles, columnName) => {
+        const uploadRef = columnName ? uploadRefs[columnName] : Object.values(uploadRefs)[0];
+        if (!uploadRef) return;
+        uploadRef.clearFiles();
+        const file = files[0];
+        file.uid = elementPlus.genFileId();
+        uploadRef.handleStart(file);
+      };
+      const handleUploadError = (error, columnName) => {
+        const errorMsg = error.message || "Unknown error";
+        message(`Upload ${columnName} gagal: ${errorMsg}`, "error");
+      };
+      const handleUploadSuccess = (response, columnName) => {
+        message(`Upload ${columnName} berhasil`, "success");
+      };
       function initializeForm() {
         props.columns.forEach((column) => {
           if (column.type === "select") {
+            if (typeof column.value === "function") {
+              form[column.name] = lodash.get(form, column.value(), "");
+            } else form[column.name] = column.value ?? "";
+          } else if (column.type === "upload") {
             form[column.name] = column.value ?? "";
-          } else if (column.type === "text") {
-            form[column.name] = column.value ?? "";
-          } else if (column.type === "textarea") {
-            form[column.name] = column.value ?? "";
-          } else if (column.type === "password") {
-            form[column.name] = column.value ?? "";
+          } else if (column.type === "checkbox") {
+            form[column.name] = column.value ?? [];
           } else if (column.type === "switch") {
             form[column.name] = column.value ?? 0;
-          } else if (column.type === "checkbox") {
-            form[column.name] = column.value ?? 0;
-          } else if (column.type === "slot") {
-            form[column.name] = column.value ?? "";
-          } else if (column.type === "hide") {
+          } else {
             form[column.name] = column.value ?? "";
           }
         });
       }
-      function onChange() {
+      function onChange(columnMetaData, inputValue) {
         emits("form", form);
+        emits("onChangeItem", { ...columnMetaData, value: inputValue });
+      }
+      async function submitAllUploads() {
+        const uploadPromises = Object.values(uploadRefs).map((uploadRef) => {
+          return new Promise((resolve) => {
+            uploadRef.submit();
+            resolve();
+          });
+        });
+        return Promise.all(uploadPromises);
       }
       async function store() {
         if (!ruleFormRef.value) return;
-        const url2 = props.storeUrl ?? props.url;
-        await ruleFormRef.value.validate((valid) => {
+        if (loading.value) return;
+        let url2 = resolveUrl(props.storeUrl ?? props.url);
+        await ruleFormRef.value.validate(async (valid) => {
+          if (props.paramsUrl) url2 = `${url2}?${props.paramsUrl}`;
           if (valid) {
-            httpPost(`${url2}?${props.paramsUrl}`, form).then((result) => {
-              if (httpValidation(result)) {
-                message(result.data.message, "success");
-                emits("onStored", result.data.data);
-              }
-            }).catch(httpHandleError);
+            loading.value = true;
+            try {
+              await submitAllUploads();
+              await http2.post(url2, form).then((result) => {
+                if (result.status >= 200 && result.status < 300) {
+                  const data = result.data;
+                  message(data.message, "success");
+                  emits("onStored", data.data);
+                }
+              }).catch(httpHandleError);
+            } catch (error) {
+              httpHandleError(error);
+            } finally {
+              loading.value = false;
+            }
           }
         });
       }
       async function update() {
         if (!ruleFormRef.value) return;
-        const url2 = props.storeUrl ?? props.url;
+        if (loading.value) return;
+        let url2 = resolveUrl(props.storeUrl ?? props.url);
+        url2 = `${url2}/${props.id}`;
+        if (props.paramsUrl) url2 = `${url2}?${props.paramsUrl}`;
+        loading.value = true;
         await ruleFormRef.value.validate((valid) => {
           if (valid) {
-            httpPut(`${url2}/${props.id}?${props.paramsUrl}`, form).then((result) => {
-              if (httpValidation(result)) {
-                message(result.data.message, "success");
-                emits("onUpdated", result.data.data);
+            http2.put(url2, form).then((result) => {
+              if (result.status >= 200 && result.status < 300) {
+                const data = result.data;
+                message(data.message, "success");
+                emits("onUpdated", data.data);
               }
-            }).catch(httpHandleError);
+            }).catch(httpHandleError).finally(() => {
+              loading.value = false;
+            });
+          } else {
+            loading.value = false;
           }
         });
       }
@@ -627,191 +932,223 @@
         initializeForm
       });
       return (_ctx, _cache) => {
-        const _component_el_input = vue.resolveComponent("el-input");
-        const _component_el_switch = vue.resolveComponent("el-switch");
         const _component_el_form_item = vue.resolveComponent("el-form-item");
-        const _component_el_checkbox = vue.resolveComponent("el-checkbox");
+        const _component_el_button = vue.resolveComponent("el-button");
+        const _component_el_upload = vue.resolveComponent("el-upload");
         const _component_el_col = vue.resolveComponent("el-col");
         const _component_el_row = vue.resolveComponent("el-row");
-        const _component_el_button = vue.resolveComponent("el-button");
         const _component_el_form = vue.resolveComponent("el-form");
-        return vue.openBlock(), vue.createBlock(_component_el_form, {
-          model: form,
-          rules: props.rules,
-          ref_key: "ruleFormRef",
-          ref: ruleFormRef,
-          "label-position": "top",
-          "label-width": "auto",
-          "status-icon": ""
-        }, {
-          default: vue.withCtx(() => [
-            vue.createVNode(_component_el_row, { gutter: 20 }, {
-              default: vue.withCtx(() => [
-                (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(props.columns, (column, index) => {
-                  return vue.openBlock(), vue.createElementBlock(vue.Fragment, { key: index }, [
-                    !["hide"].includes(column.type) ? (vue.openBlock(), vue.createBlock(_component_el_col, {
-                      key: 0,
-                      span: columnGrid(column.grid ?? 24),
-                      sm: columnGrid(column.grid ?? 24, "sm"),
-                      md: columnGrid(column.grid ?? 24, "md"),
-                      lg: columnGrid(column.grid ?? 24, "lg"),
-                      xl: columnGrid(column.grid ?? 24, "xl")
-                    }, {
-                      default: vue.withCtx(() => [
-                        !["checkbox", "slot:el-form-item"].includes(column.type) ? (vue.openBlock(), vue.createBlock(_component_el_form_item, {
-                          key: 0,
-                          label: column.label,
-                          prop: column.name
-                        }, {
-                          default: vue.withCtx(() => {
-                            var _a, _b, _c, _d, _e, _f, _g;
-                            return [
-                              column.type === "text" ? (vue.openBlock(), vue.createBlock(_component_el_input, {
-                                key: 0,
-                                modelValue: form[column.name],
-                                "onUpdate:modelValue": ($event) => form[column.name] = $event,
-                                disabled: column.disabled,
-                                onChange
-                              }, null, 8, ["modelValue", "onUpdate:modelValue", "disabled"])) : vue.createCommentVNode("", true),
-                              column.type === "textarea" ? (vue.openBlock(), vue.createBlock(_component_el_input, {
-                                key: 1,
-                                modelValue: form[column.name],
-                                "onUpdate:modelValue": ($event) => form[column.name] = $event,
-                                type: "textarea",
-                                disabled: column.disabled,
-                                onChange
-                              }, null, 8, ["modelValue", "onUpdate:modelValue", "disabled"])) : vue.createCommentVNode("", true),
-                              column.type === "select" ? (vue.openBlock(), vue.createBlock(_sfc_main$2, {
-                                key: 2,
-                                modelValue: form[column.name],
-                                "onUpdate:modelValue": ($event) => form[column.name] = $event,
-                                disabled: column.disabled,
-                                "fetch-on-click": (_a = column.select) == null ? void 0 : _a.fetch_on_click,
-                                "field-label": ((_b = column.select) == null ? void 0 : _b.field_label) ?? "name",
-                                "field-value": ((_c = column.select) == null ? void 0 : _c.field_value) ?? "id",
-                                "field-search-column": (_d = column.select) == null ? void 0 : _d.field_search_column,
-                                options: (_e = column.select) == null ? void 0 : _e.options,
-                                placeholder: column.placeholder,
-                                remote: (_f = column.select) == null ? void 0 : _f.remote,
-                                url: (_g = column.select) == null ? void 0 : _g.url,
-                                onChange
-                              }, null, 8, ["modelValue", "onUpdate:modelValue", "disabled", "fetch-on-click", "field-label", "field-value", "field-search-column", "options", "placeholder", "remote", "url"])) : vue.createCommentVNode("", true),
-                              column.type === "password" ? (vue.openBlock(), vue.createBlock(_component_el_input, {
-                                key: 3,
-                                modelValue: form[column.name],
-                                "onUpdate:modelValue": ($event) => form[column.name] = $event,
-                                onChange,
-                                type: "password",
-                                "show-password": ""
-                              }, null, 8, ["modelValue", "onUpdate:modelValue"])) : vue.createCommentVNode("", true),
-                              column.type === "switch" ? (vue.openBlock(), vue.createBlock(_component_el_switch, {
-                                key: 4,
-                                modelValue: form[column.name],
-                                "onUpdate:modelValue": ($event) => form[column.name] = $event,
-                                onChange,
-                                "active-icon": vue.unref(check_default),
-                                "inactive-icon": vue.unref(close_default)
-                              }, null, 8, ["modelValue", "onUpdate:modelValue", "active-icon", "inactive-icon"])) : vue.createCommentVNode("", true),
-                              column.type === "slot" ? vue.renderSlot(_ctx.$slots, column.name, {
-                                key: 5,
-                                form
-                              }) : vue.createCommentVNode("", true)
-                            ];
-                          }),
-                          _: 2
-                        }, 1032, ["label", "prop"])) : vue.createCommentVNode("", true),
-                        ["checkbox"].includes(column.type) ? (vue.openBlock(), vue.createBlock(_component_el_form_item, {
-                          key: 1,
-                          prop: column.name
-                        }, {
-                          default: vue.withCtx(() => [
-                            column.type === "checkbox" ? (vue.openBlock(), vue.createBlock(_component_el_checkbox, {
-                              key: 0,
-                              modelValue: form[column.name],
-                              "onUpdate:modelValue": ($event) => form[column.name] = $event,
-                              onChange,
-                              label: column.label
-                            }, null, 8, ["modelValue", "onUpdate:modelValue", "label"])) : vue.createCommentVNode("", true)
-                          ]),
-                          _: 2
-                        }, 1032, ["prop"])) : vue.createCommentVNode("", true),
-                        column.type === "slot:el-form-item" ? vue.renderSlot(_ctx.$slots, column.name, {
-                          key: 2,
-                          form
-                        }) : vue.createCommentVNode("", true)
-                      ]),
-                      _: 2
-                    }, 1032, ["span", "sm", "md", "lg", "xl"])) : vue.createCommentVNode("", true)
-                  ], 64);
-                }), 128))
-              ]),
-              _: 3
-            }),
-            vue.createElementVNode("div", _hoisted_1$1, [
-              vue.createVNode(_component_el_button, {
-                icon: vue.unref(close_default),
-                onClick: _cache[0] || (_cache[0] = ($event) => emits("back")),
-                type: "danger",
-                plain: ""
-              }, {
-                default: vue.withCtx(() => _cache[1] || (_cache[1] = [
-                  vue.createTextVNode("Batal")
-                ])),
-                _: 1,
-                __: [1]
-              }, 8, ["icon"]),
-              props.id ? (vue.openBlock(), vue.createBlock(_component_el_button, {
-                key: 0,
-                onClick: update,
-                icon: vue.unref(promotion_default),
-                type: "primary",
-                class: "ml-4"
-              }, {
-                default: vue.withCtx(() => _cache[2] || (_cache[2] = [
-                  vue.createTextVNode(" Perbaharui ")
-                ])),
-                _: 1,
-                __: [2]
-              }, 8, ["icon"])) : (vue.openBlock(), vue.createBlock(_component_el_button, {
-                key: 1,
-                onClick: store,
-                icon: vue.unref(promotion_default),
-                type: "primary",
-                class: "ml-4"
-              }, {
-                default: vue.withCtx(() => _cache[3] || (_cache[3] = [
-                  vue.createTextVNode(" Simpan ")
-                ])),
-                _: 1,
-                __: [3]
-              }, 8, ["icon"]))
-            ])
+        return vue.openBlock(), vue.createElementBlock("div", null, [
+          vue.createElementVNode("div", _hoisted_1$1, [
+            !_ctx.$slots.title ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_2$1, [
+              vue.createElementVNode("div", _hoisted_3$1, vue.toDisplayString(props.title), 1),
+              vue.createElementVNode("div", null, vue.toDisplayString(props.description), 1)
+            ])) : vue.createCommentVNode("", true),
+            vue.renderSlot(_ctx.$slots, "title")
           ]),
-          _: 3
-        }, 8, ["model", "rules"]);
+          vue.createVNode(_component_el_form, {
+            model: form,
+            rules: props.rules,
+            class: "p-4",
+            ref_key: "ruleFormRef",
+            ref: ruleFormRef,
+            "label-position": "top",
+            "label-width": "auto",
+            "status-icon": ""
+          }, {
+            default: vue.withCtx(() => [
+              vue.createVNode(_component_el_row, { gutter: 20 }, {
+                default: vue.withCtx(() => [
+                  (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(props.columns, (column, index) => {
+                    return vue.openBlock(), vue.createElementBlock(vue.Fragment, { key: index }, [
+                      !["hide"].includes(column.type) ? (vue.openBlock(), vue.createBlock(_component_el_col, {
+                        key: 0,
+                        span: columnGrid(column.grid ?? 24),
+                        sm: columnGrid(column.grid ?? 24, "sm"),
+                        md: columnGrid(column.grid ?? 24, "md"),
+                        lg: columnGrid(column.grid ?? 24, "lg"),
+                        xl: columnGrid(column.grid ?? 24, "xl")
+                      }, {
+                        default: vue.withCtx(() => [
+                          !["slot:el-form-item", "checkbox"].includes(column.type) ? (vue.openBlock(), vue.createBlock(_component_el_form_item, {
+                            key: 0,
+                            label: column.label,
+                            prop: column.name
+                          }, {
+                            default: vue.withCtx(() => [
+                              vue.createVNode(_sfc_main$2, {
+                                column,
+                                modelValue: form[column.name],
+                                "onUpdate:modelValue": ($event) => form[column.name] = $event,
+                                onChange: (val) => onChange(column, val)
+                              }, {
+                                slot: vue.withCtx((slotProps) => [
+                                  vue.renderSlot(_ctx.$slots, column.name, { form })
+                                ]),
+                                _: 2
+                              }, 1032, ["column", "modelValue", "onUpdate:modelValue", "onChange"])
+                            ]),
+                            _: 2
+                          }, 1032, ["label", "prop"])) : vue.createCommentVNode("", true),
+                          column.type === "checkbox" && !column.options ? (vue.openBlock(), vue.createBlock(_component_el_form_item, {
+                            key: 1,
+                            prop: column.name
+                          }, {
+                            default: vue.withCtx(() => [
+                              vue.createVNode(_sfc_main$2, {
+                                column,
+                                modelValue: form[column.name],
+                                "onUpdate:modelValue": ($event) => form[column.name] = $event,
+                                onChange: (val) => onChange(column, val)
+                              }, null, 8, ["column", "modelValue", "onUpdate:modelValue", "onChange"])
+                            ]),
+                            _: 2
+                          }, 1032, ["prop"])) : vue.createCommentVNode("", true),
+                          column.type === "upload" ? (vue.openBlock(), vue.createBlock(_component_el_form_item, {
+                            key: 2,
+                            label: column.label,
+                            prop: column.name
+                          }, {
+                            default: vue.withCtx(() => {
+                              var _a;
+                              return [
+                                vue.createVNode(_component_el_upload, {
+                                  ref_for: true,
+                                  ref: (el) => {
+                                    if (el) uploadRefs[column.name] = el;
+                                  },
+                                  action: (_a = column.upload) == null ? void 0 : _a.url,
+                                  limit: 1,
+                                  "on-exceed": (files) => handleExceed(files, [], column.name),
+                                  "auto-upload": false,
+                                  onChange: (val) => onChange(column, val),
+                                  onError: (err) => handleUploadError(err, column.name),
+                                  onSuccess: (res) => handleUploadSuccess(res, column.name)
+                                }, {
+                                  trigger: vue.withCtx(() => [
+                                    vue.createVNode(_component_el_button, { type: "primary" }, {
+                                      default: vue.withCtx(() => _cache[1] || (_cache[1] = [
+                                        vue.createTextVNode("select file")
+                                      ])),
+                                      _: 1,
+                                      __: [1]
+                                    })
+                                  ]),
+                                  tip: vue.withCtx(() => _cache[2] || (_cache[2] = [
+                                    vue.createElementVNode("div", { class: "el-upload__tip text-red" }, " limit 1 file, new file will cover the old file ", -1)
+                                  ])),
+                                  _: 2
+                                }, 1032, ["action", "on-exceed", "onChange", "onError", "onSuccess"])
+                              ];
+                            }),
+                            _: 2
+                          }, 1032, ["label", "prop"])) : vue.createCommentVNode("", true),
+                          column.type === "slot:el-form-item" ? vue.renderSlot(_ctx.$slots, column.name, {
+                            key: 3,
+                            form
+                          }) : vue.createCommentVNode("", true)
+                        ]),
+                        _: 2
+                      }, 1032, ["span", "sm", "md", "lg", "xl"])) : vue.createCommentVNode("", true)
+                    ], 64);
+                  }), 128))
+                ]),
+                _: 3
+              }),
+              vue.createElementVNode("div", _hoisted_4$1, [
+                vue.createVNode(_component_el_button, {
+                  icon: vue.unref(close_default),
+                  onClick: _cache[0] || (_cache[0] = ($event) => emits("back")),
+                  type: "danger",
+                  plain: "",
+                  disabled: loading.value
+                }, {
+                  default: vue.withCtx(() => _cache[3] || (_cache[3] = [
+                    vue.createTextVNode("Batal")
+                  ])),
+                  _: 1,
+                  __: [3]
+                }, 8, ["icon", "disabled"]),
+                props.id ? (vue.openBlock(), vue.createBlock(_component_el_button, {
+                  key: 0,
+                  onClick: update,
+                  icon: vue.unref(promotion_default),
+                  type: "primary",
+                  class: "ml-4",
+                  loading: loading.value
+                }, {
+                  default: vue.withCtx(() => _cache[4] || (_cache[4] = [
+                    vue.createTextVNode(" Perbaharui ")
+                  ])),
+                  _: 1,
+                  __: [4]
+                }, 8, ["icon", "loading"])) : (vue.openBlock(), vue.createElementBlock(vue.Fragment, { key: 1 }, [
+                  !_ctx.$slots.buttonStore ? (vue.openBlock(), vue.createBlock(_component_el_button, {
+                    key: 0,
+                    onClick: store,
+                    icon: vue.unref(promotion_default),
+                    type: "primary",
+                    class: "ml-4",
+                    loading: loading.value
+                  }, {
+                    default: vue.withCtx(() => _cache[5] || (_cache[5] = [
+                      vue.createTextVNode(" Simpan ")
+                    ])),
+                    _: 1,
+                    __: [5]
+                  }, 8, ["icon", "loading"])) : vue.createCommentVNode("", true),
+                  vue.renderSlot(_ctx.$slots, "buttonStore")
+                ], 64))
+              ])
+            ]),
+            _: 3
+          }, 8, ["model", "rules"])
+        ]);
       };
     }
   });
-  const _hoisted_1 = { class: "flex justify-end" };
-  const _hoisted_2 = { class: "hover:cursor-pointer hover:bg-slate-200 justify-center rounded flex items-center" };
-  const _hoisted_3 = { class: "flex items-center py-2 px-4 hover:cursor-pointer hover:bg-slate-100" };
-  const _hoisted_4 = { class: "flex items-center py-2 px-4 hover:cursor-pointer hover:bg-slate-100" };
-  const _hoisted_5 = { class: "flex justify-end mt-4" };
-  const _hoisted_6 = { class: "dialog-footer" };
+  const _hoisted_1 = { class: "flex justify-between p-4 border-b border-[#ebeef5]" };
+  const _hoisted_2 = { key: 0 };
+  const _hoisted_3 = { class: "text-xl font-bold" };
+  const _hoisted_4 = { class: "text-sm text-gray-400" };
+  const _hoisted_5 = {
+    key: 1,
+    class: "flex justify-end gap-4"
+  };
+  const _hoisted_6 = {
+    key: 0,
+    class: "hover:cursor-pointer hover:bg-slate-200 justify-center rounded flex items-center"
+  };
+  const _hoisted_7 = { class: "flex items-center py-2 px-4 hover:cursor-pointer hover:bg-slate-100" };
+  const _hoisted_8 = { class: "flex items-center py-2 px-4 hover:cursor-pointer hover:bg-slate-100" };
+  const _hoisted_9 = {
+    key: 0,
+    class: "flex justify-end p-4"
+  };
+  const _hoisted_10 = { class: "dialog-footer" };
   const _sfc_main = /* @__PURE__ */ vue.defineComponent({
     __name: "ComTable",
     props: {
-      buttonEditUrl: { type: Function },
-      buttonViewUrl: { type: Function },
+      buttonCreateUrl: {},
+      buttonEditUrl: {},
+      buttonViewUrl: {},
+      buttonMoreFieldShow: { type: Boolean, default: true },
+      buttonFilterShow: { type: Boolean, default: true },
+      buttonDeleteShow: { type: Boolean, default: true },
       columns: {},
+      deleteUrl: {},
+      description: {},
+      paginationShow: { type: Boolean, default: true },
       setRelations: {},
       setColumns: {},
       setQueries: {},
       setOrder: {},
-      url: {},
-      deleteUrl: {}
+      style: {},
+      toolbarShow: { type: Boolean, default: true },
+      title: {},
+      url: {}
     },
-    emits: ["tableSelections"],
+    emits: ["onReady", "tableSelections"],
     setup(__props, { expose: __expose, emit: __emit }) {
       const emits = __emit;
       const props = __props;
@@ -819,8 +1156,10 @@
       const dataSelected = vue.ref([]);
       const dialogDeleteConfirmation = vue.ref();
       const currentPage = vue.ref(1);
+      const http2 = new HttpBuilder();
       const loading = vue.ref(true);
       const pageSize = vue.ref(10);
+      const tableRef = vue.ref();
       const totalData = vue.ref(0);
       const state = vue.reactive({
         data: {},
@@ -831,9 +1170,14 @@
       function changePage() {
         fetchingDataFromServer();
       }
+      function changeSelection(values) {
+        values.map((id) => {
+          tableRef.value.toggleRowSelection({ id });
+        });
+      }
       function fetchingDataFromServer() {
         loading.value = true;
-        httpGet(props.url, {
+        http2.get(resolveUrl(props.url), {
           params: {
             relations: props.setRelations,
             columns: props.setColumns,
@@ -847,6 +1191,7 @@
           data.value = result.data.data.data;
           totalData.value = result.data.data.total;
           state.collection = result.data.data;
+          emits("onReady", data.value);
         }).catch((error) => {
           loading.value = false;
           httpHandleError(error);
@@ -873,11 +1218,11 @@
         const ids = dataSelected.value.map((item) => {
           return item.id;
         });
-        httpDelete(`${props.deleteUrl}`, {
+        http2.delete(resolveUrl(props.deleteUrl), {
           data: {
             id: ids
           }
-        }).then((result) => {
+        }).then(() => {
           refresh();
           dialogDeleteConfirmation.value = false;
         }).catch(httpHandleError);
@@ -885,12 +1230,12 @@
       vue.onMounted(() => {
         fetchingDataFromServer();
       });
-      __expose({ refresh, remove });
+      __expose({ changeSelection, refresh, remove });
       return (_ctx, _cache) => {
         const _component_el_button = vue.resolveComponent("el-button");
+        const _component_RouterLink = vue.resolveComponent("RouterLink");
         const _component_el_table_column = vue.resolveComponent("el-table-column");
         const _component_el_icon = vue.resolveComponent("el-icon");
-        const _component_RouterLink = vue.resolveComponent("RouterLink");
         const _component_el_popover = vue.resolveComponent("el-popover");
         const _component_el_table = vue.resolveComponent("el-table");
         const _component_el_pagination = vue.resolveComponent("el-pagination");
@@ -898,29 +1243,56 @@
         const _directive_loading = vue.resolveDirective("loading");
         return vue.openBlock(), vue.createElementBlock("div", null, [
           vue.createElementVNode("div", _hoisted_1, [
-            !_ctx.$slots.buttonDelete ? (vue.openBlock(), vue.createBlock(_component_el_button, {
-              key: 0,
-              onClick: _cache[0] || (_cache[0] = ($event) => dialogDeleteConfirmation.value = true),
-              type: "danger"
-            }, {
-              default: vue.withCtx(() => _cache[5] || (_cache[5] = [
-                vue.createTextVNode("Hapus")
-              ])),
-              _: 1,
-              __: [5]
-            })) : vue.createCommentVNode("", true),
-            vue.renderSlot(_ctx.$slots, "buttonDelete"),
-            vue.createVNode(_component_el_button, null, {
-              default: vue.withCtx(() => _cache[6] || (_cache[6] = [
-                vue.createTextVNode("Filter")
-              ])),
-              _: 1,
-              __: [6]
-            })
+            !_ctx.$slots.title ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_2, [
+              vue.createElementVNode("div", _hoisted_3, vue.toDisplayString(props.title), 1),
+              vue.createElementVNode("div", _hoisted_4, vue.toDisplayString(props.description), 1)
+            ])) : vue.createCommentVNode("", true),
+            vue.renderSlot(_ctx.$slots, "title"),
+            props.toolbarShow ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_5, [
+              vue.renderSlot(_ctx.$slots, "toolbar-1"),
+              props.buttonCreateUrl ? (vue.openBlock(), vue.createBlock(_component_RouterLink, {
+                key: 0,
+                to: props.buttonCreateUrl()
+              }, {
+                default: vue.withCtx(() => [
+                  vue.createVNode(_component_el_button, {
+                    icon: vue.unref(plus_default),
+                    type: "primary"
+                  }, {
+                    default: vue.withCtx(() => _cache[5] || (_cache[5] = [
+                      vue.createTextVNode("Tambah")
+                    ])),
+                    _: 1,
+                    __: [5]
+                  }, 8, ["icon"])
+                ]),
+                _: 1
+              }, 8, ["to"])) : vue.createCommentVNode("", true),
+              vue.renderSlot(_ctx.$slots, "toolbar-2"),
+              !_ctx.$slots.buttonDelete && dataSelected.value.length && props.buttonDeleteShow ? (vue.openBlock(), vue.createBlock(_component_el_button, {
+                key: 1,
+                onClick: _cache[0] || (_cache[0] = ($event) => dialogDeleteConfirmation.value = true),
+                icon: vue.unref(delete_default),
+                type: "danger",
+                class: "m-0!"
+              }, {
+                default: vue.withCtx(() => _cache[6] || (_cache[6] = [
+                  vue.createTextVNode("Hapus")
+                ])),
+                _: 1,
+                __: [6]
+              }, 8, ["icon"])) : vue.createCommentVNode("", true),
+              vue.renderSlot(_ctx.$slots, "buttonDelete"),
+              vue.renderSlot(_ctx.$slots, "toolbar-3"),
+              vue.renderSlot(_ctx.$slots, "toolbar-4")
+            ])) : vue.createCommentVNode("", true)
           ]),
           vue.withDirectives((vue.openBlock(), vue.createBlock(_component_el_table, {
             data: data.value,
             onSelectionChange: handleSelectionChange,
+            ref_key: "tableRef",
+            ref: tableRef,
+            "row-key": "id",
             style: { "width": "100%" }
           }, {
             default: vue.withCtx(() => [
@@ -970,70 +1342,71 @@
                 width: "55",
                 fixed: "right"
               }, {
-                default: vue.withCtx((scope) => [
-                  vue.createElementVNode("div", _hoisted_2, [
-                    vue.createVNode(_component_el_popover, {
-                      placement: "bottom",
-                      width: 150,
-                      "popper-class": "!p-0",
-                      trigger: "click"
-                    }, {
-                      reference: vue.withCtx(() => [
-                        vue.createVNode(_component_el_icon, null, {
-                          default: vue.withCtx(() => [
-                            vue.createVNode(vue.unref(more_filled_default))
-                          ]),
-                          _: 1
-                        })
-                      ]),
-                      default: vue.withCtx(() => [
-                        vue.createElementVNode("ul", null, [
-                          typeof _ctx.buttonViewUrl === "function" ? (vue.openBlock(), vue.createBlock(_component_RouterLink, {
-                            key: 0,
-                            to: _ctx.buttonViewUrl(scope.row),
-                            target: "_blank"
-                          }, {
+                default: vue.withCtx((scope) => {
+                  var _a;
+                  return [
+                    props.buttonMoreFieldShow ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_6, [
+                      vue.createVNode(_component_el_popover, {
+                        placement: "bottom",
+                        width: ((_a = props.style) == null ? void 0 : _a.popOverWidth) ?? 150,
+                        "popper-class": "!p-0",
+                        trigger: "click"
+                      }, {
+                        reference: vue.withCtx(() => [
+                          vue.createVNode(_component_el_icon, null, {
                             default: vue.withCtx(() => [
-                              vue.createElementVNode("li", _hoisted_3, [
-                                vue.createVNode(_component_el_icon, null, {
-                                  default: vue.withCtx(() => [
-                                    vue.createVNode(vue.unref(view_default))
-                                  ]),
-                                  _: 1
-                                }),
-                                _cache[7] || (_cache[7] = vue.createTextVNode()),
-                                _cache[8] || (_cache[8] = vue.createElementVNode("span", { class: "ml-2" }, "Lihat", -1))
-                              ])
+                              vue.createVNode(vue.unref(more_filled_default))
                             ]),
-                            _: 2
-                          }, 1032, ["to"])) : vue.createCommentVNode("", true),
-                          typeof _ctx.buttonEditUrl === "function" ? (vue.openBlock(), vue.createBlock(_component_RouterLink, {
-                            key: 1,
-                            to: _ctx.buttonEditUrl(scope.row)
-                          }, {
-                            default: vue.withCtx(() => [
-                              vue.createElementVNode("li", _hoisted_4, [
-                                vue.createVNode(_component_el_icon, null, {
-                                  default: vue.withCtx(() => [
-                                    vue.createVNode(vue.unref(edit_default))
-                                  ]),
-                                  _: 1
-                                }),
-                                _cache[9] || (_cache[9] = vue.createTextVNode()),
-                                _cache[10] || (_cache[10] = vue.createElementVNode("span", { class: "ml-2" }, "Ubah", -1))
-                              ])
-                            ]),
-                            _: 2
-                          }, 1032, ["to"])) : vue.createCommentVNode("", true),
-                          vue.renderSlot(_ctx.$slots, "action", {
-                            row: scope.row
+                            _: 1
                           })
-                        ])
-                      ]),
-                      _: 2
-                    }, 1024)
-                  ])
-                ]),
+                        ]),
+                        default: vue.withCtx(() => [
+                          vue.createElementVNode("ul", null, [
+                            typeof _ctx.buttonViewUrl === "function" ? (vue.openBlock(), vue.createBlock(_component_RouterLink, {
+                              key: 0,
+                              to: _ctx.buttonViewUrl(scope.row),
+                              target: "_blank"
+                            }, {
+                              default: vue.withCtx(() => [
+                                vue.createElementVNode("li", _hoisted_7, [
+                                  vue.createVNode(_component_el_icon, null, {
+                                    default: vue.withCtx(() => [
+                                      vue.createVNode(vue.unref(view_default))
+                                    ]),
+                                    _: 1
+                                  }),
+                                  _cache[7] || (_cache[7] = vue.createElementVNode("span", { class: "ml-2" }, "Lihat", -1))
+                                ])
+                              ]),
+                              _: 2
+                            }, 1032, ["to"])) : vue.createCommentVNode("", true),
+                            typeof _ctx.buttonEditUrl === "function" ? (vue.openBlock(), vue.createBlock(_component_RouterLink, {
+                              key: 1,
+                              to: _ctx.buttonEditUrl(scope.row)
+                            }, {
+                              default: vue.withCtx(() => [
+                                vue.createElementVNode("li", _hoisted_8, [
+                                  vue.createVNode(_component_el_icon, null, {
+                                    default: vue.withCtx(() => [
+                                      vue.createVNode(vue.unref(edit_default))
+                                    ]),
+                                    _: 1
+                                  }),
+                                  _cache[8] || (_cache[8] = vue.createElementVNode("span", { class: "ml-2" }, "Ubah", -1))
+                                ])
+                              ]),
+                              _: 2
+                            }, 1032, ["to"])) : vue.createCommentVNode("", true),
+                            vue.renderSlot(_ctx.$slots, "action", {
+                              row: scope.row
+                            })
+                          ])
+                        ]),
+                        _: 2
+                      }, 1032, ["width"])
+                    ])) : vue.createCommentVNode("", true)
+                  ];
+                }),
                 _: 3
               })
             ]),
@@ -1041,7 +1414,7 @@
           }, 8, ["data"])), [
             [_directive_loading, loading.value]
           ]),
-          vue.createElementVNode("div", _hoisted_5, [
+          props.paginationShow ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_9, [
             vue.createVNode(_component_el_pagination, {
               "page-size": pageSize.value,
               "onUpdate:pageSize": _cache[1] || (_cache[1] = ($event) => pageSize.value = $event),
@@ -1052,7 +1425,7 @@
               onChange: changePage,
               layout: "sizes, total, prev, pager, next"
             }, null, 8, ["page-size", "current-page", "total"])
-          ]),
+          ])) : vue.createCommentVNode("", true),
           vue.createVNode(_component_el_dialog, {
             modelValue: dialogDeleteConfirmation.value,
             "onUpdate:modelValue": _cache[4] || (_cache[4] = ($event) => dialogDeleteConfirmation.value = $event),
@@ -1060,42 +1433,42 @@
             width: "500"
           }, {
             footer: vue.withCtx(() => [
-              vue.createElementVNode("div", _hoisted_6, [
+              vue.createElementVNode("div", _hoisted_10, [
                 vue.createVNode(_component_el_button, {
                   onClick: _cache[3] || (_cache[3] = ($event) => dialogDeleteConfirmation.value = false)
                 }, {
-                  default: vue.withCtx(() => _cache[11] || (_cache[11] = [
+                  default: vue.withCtx(() => _cache[9] || (_cache[9] = [
                     vue.createTextVNode("Cancel")
                   ])),
                   _: 1,
-                  __: [11]
+                  __: [9]
                 }),
                 vue.createVNode(_component_el_button, {
                   type: "primary",
                   onClick: remove
                 }, {
-                  default: vue.withCtx(() => _cache[12] || (_cache[12] = [
+                  default: vue.withCtx(() => _cache[10] || (_cache[10] = [
                     vue.createTextVNode(" Confirm ")
                   ])),
                   _: 1,
-                  __: [12]
+                  __: [10]
                 })
               ])
             ]),
             default: vue.withCtx(() => [
-              _cache[13] || (_cache[13] = vue.createElementVNode("span", null, "Anda yakin ingin menghapus data yang Anda pilih ?", -1))
+              _cache[11] || (_cache[11] = vue.createElementVNode("span", null, "Anda yakin ingin menghapus data yang Anda pilih ?", -1))
             ]),
             _: 1,
-            __: [13]
+            __: [11]
           }, 8, ["modelValue"])
         ]);
       };
     }
   });
   exports2.ComContainer = ComContainer;
-  exports2.ComDialogConfirmation = _sfc_main$3;
+  exports2.ComDialogConfirmation = _sfc_main$4;
   exports2.ComForm = _sfc_main$1;
-  exports2.ComSelect = _sfc_main$2;
+  exports2.ComSelect = _sfc_main$3;
   exports2.ComTable = _sfc_main;
   exports2.beautyDate = beautyDate;
   exports2.beautyDateTime = beautyDateTime;
@@ -1106,8 +1479,7 @@
   exports2.getAppConfig = getAppConfig;
   exports2.getBrowserType = getBrowserType;
   exports2.getInitials = getInitials;
-  exports2.getRefreshToken = getRefreshToken;
-  exports2.getToken = getToken;
+  exports2.hasHttpProtocol = hasHttpProtocol;
   exports2.htmlToPlainText = htmlToPlainText;
   exports2.http = http;
   exports2.httpDelete = httpDelete;
@@ -1121,11 +1493,10 @@
   exports2.minuteToTime = minuteToTime;
   exports2.numberFormat = numberFormat;
   exports2.pascalCase = pascalCase;
-  exports2.removeRefreshToken = removeRefreshToken;
   exports2.replaceString = replaceString;
+  exports2.resolveUrl = resolveUrl;
   exports2.routeParam = routeParam;
   exports2.setAppConfig = setAppConfig;
-  exports2.setRefreshToken = setRefreshToken;
   exports2.titleCase = titleCase;
   exports2.url = url;
   exports2.urlToKebab = urlToKebab;

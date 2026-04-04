@@ -1,7 +1,7 @@
 export interface AppConfig {
-    token_name: string;
     http?: {
-        withCredentials: boolean;
+        baseUrl?: string;
+        withCredentials?: boolean;
     };
 }
 export declare function setAppConfig(cfg: AppConfig): void;

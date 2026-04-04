@@ -1,35 +1,35 @@
 <script lang="ts" setup>
 import { get } from 'lodash'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { httpHandleError, resolveUrl } from '../utils/helpers'
 import { HttpBuilder } from '../utils/http'
+import type { ComSelectProps } from '../types'
 
 const emit = defineEmits(['update:modelValue'])
 
-const props = defineProps<{
-  disabled?: boolean
-  fetchOnClick?: boolean
-  fieldLabel?: string | ((row: Record<string, unknown>) => string)
-  fieldValue?: string
-  fieldSearchColumn?: string
-  options?: Array<unknown>
-  placeholder?: string
-  placement?: string
-  remote?: boolean
-  url?: string
-}>()
+const props = withDefaults(
+  defineProps<ComSelectProps & { modelValue?: any }>(),
+  {
+    fetchOnClick: true,
+  }
+)
 
-const collections = ref<Array<Record<string, never>>>([])
+const collections = ref<Array<Record<string, any>>>([])
 const fetchLoading = ref<boolean>(false)
 const http = new HttpBuilder()
-const value = ref('')
 
-const fieldLabel = computed(() => props.fieldLabel ?? 'name')
-const fieldValue = computed(() => props.fieldValue ?? 'id')
-const fieldSearchColumn = computed(() => props.fieldSearchColumn ?? fieldLabel.value)
+const fieldLabel = computed(() => props.field_label ?? 'name')
+const fieldValue = computed(() => props.field_value ?? 'id')
+const fieldSearchColumn = computed(() => props.field_search_column ?? fieldLabel.value)
+
+// Sync internal value with parent modelValue
+const value = computed({
+  get: () => props.modelValue,
+  set: (val) => emit('update:modelValue', val),
+})
 
 // Methods
-function changeCollection(values: Record<string, never>[]) {
+function changeCollection(values: Record<string, any>[]) {
   collections.value = values
 }
 
@@ -48,7 +48,7 @@ function fetchingDataFromServer(search?: string) {
   }
 
   http
-    .get<{ data: Record<string, never>[] }>(resolveUrl(props.url), {
+    .get<{ data: Record<string, any>[] }>(resolveUrl(props.url), {
       params,
     })
     .then((result) => {
@@ -61,9 +61,19 @@ function fetchingDataFromServer(search?: string) {
     })
 }
 
+// Watch for options prop changes
+watch(
+  () => props.options,
+  (newOptions) => {
+    if (newOptions) {
+      collections.value = newOptions as Array<Record<string, any>>
+    }
+  }
+)
+
 onMounted(() => {
   if (props.url && (props.fetchOnClick ?? true)) fetchingDataFromServer()
-  if (props.options) collections.value = props.options as Array<Record<string, never>>
+  if (props.options) collections.value = props.options as Array<Record<string, any>>
 })
 
 defineExpose({
@@ -83,7 +93,6 @@ defineExpose({
     :loading="fetchLoading"
     :placeholder="props.placeholder ?? 'Select'"
     :placement="props.placement ?? 'bottom'"
-    @change="(val: any) => emit('update:modelValue', val)"
     filterable
     clearable
   >

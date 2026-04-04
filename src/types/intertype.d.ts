@@ -13,6 +13,20 @@ export interface Pagination<T> {
 }
 
 export interface ComSelectProps {
+  modelValue?: any
+  disabled?: boolean
+  fetchOnClick?: boolean
+  options?: Array<unknown>
+  url?: string
+  field_label?: string | ((row: Record<string, unknown>) => string)
+  field_value?: string
+  field_search_column?: string
+  placeholder?: string
+  placement?: string
+  remote?: boolean
+}
+
+export interface ComFormColumnSelect {
   options?: Array<unknown>
   url?: string
   field_label?: string | ((row: Record<string, unknown>) => string)
@@ -48,9 +62,9 @@ export interface ComFormColumn {
   label?: string
   type: ComFormColumnType
   grid?: number | Record<string, number>
-  value?: string | number | UploadInstance
+  value?: string | number | UploadInstance | (() => string)
   disabled?: boolean
-  select?: ComSelectProps
+  select?: ComFormColumnSelect
   options?: {
     value: string | number | boolean
     label: string

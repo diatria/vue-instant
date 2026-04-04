@@ -1,48 +1,33 @@
-import { FormRules } from 'element-plus';
-import { Query } from '../types';
-type ColumnSelect = {
-    options?: Array<unknown>;
-    url?: string;
-    field_label?: string | ((row: any) => any);
-    field_value?: string;
-    field_search_column?: string;
-    fetch_on_click?: boolean;
-    remote?: boolean;
-};
-type ColumnType = 'text' | 'textarea' | 'select' | 'password' | 'switch' | 'checkbox' | 'slot' | 'slot:el-form-item' | 'hide';
-interface Column {
-    name: string;
-    label?: string;
-    type: ColumnType;
-    grid?: number | Record<string, number>;
-    value?: string | number;
-    disabled?: boolean;
-    select?: ColumnSelect;
-    placeholder?: string;
-}
+import { FormRules, UploadInstance } from 'element-plus';
+import { ComFormColumn, ComFormProps as ComFormPropsType } from '../types';
 interface ComFormProps {
-    columns: Column[];
+    columns: ComFormColumn[];
     id?: number;
+    description?: string;
     fetchUrl?: string;
     paramsUrl?: string;
-    queries?: Query;
-    relations?: any[];
+    queries?: ComFormPropsType['queries'];
+    relations?: string[];
     rules?: FormRules;
     storeUrl?: string;
+    title?: string;
     url: string;
 }
 declare function initializeForm(): void;
 declare function __VLS_template(): {
     attrs: Partial<{}>;
     slots: Partial<Record<string, (_: {
-        form: Record<string, string | number>;
+        form: Record<string, string | number | UploadInstance | (string | number)[] | (() => string)>;
     }) => any>> & Partial<Record<string, (_: {
-        form: Record<string, string | number>;
-    }) => any>>;
+        form: Record<string, string | number | UploadInstance | (string | number)[] | (() => string)>;
+    }) => any>> & {
+        title?(_: {}): any;
+        buttonStore?(_: {}): any;
+    };
     refs: {
         ruleFormRef: unknown;
     };
-    rootEl: any;
+    rootEl: HTMLDivElement;
 };
 type __VLS_TemplateResult = ReturnType<typeof __VLS_template>;
 declare const __VLS_component: import('vue').DefineComponent<ComFormProps, {
@@ -53,15 +38,17 @@ declare const __VLS_component: import('vue').DefineComponent<ComFormProps, {
     back: (...args: any[]) => void;
     onStored: (...args: any[]) => void;
     onUpdated: (...args: any[]) => void;
+    onChangeItem: (...args: any[]) => void;
 }, string, import('vue').PublicProps, Readonly<ComFormProps> & Readonly<{
     onForm?: ((...args: any[]) => any) | undefined;
     onDelete?: ((...args: any[]) => any) | undefined;
     onBack?: ((...args: any[]) => any) | undefined;
     onOnStored?: ((...args: any[]) => any) | undefined;
     onOnUpdated?: ((...args: any[]) => any) | undefined;
+    onOnChangeItem?: ((...args: any[]) => any) | undefined;
 }>, {}, {}, {}, {}, string, import('vue').ComponentProvideOptions, false, {
     ruleFormRef: unknown;
-}, any>;
+}, HTMLDivElement>;
 declare const _default: __VLS_WithTemplateSlots<typeof __VLS_component, __VLS_TemplateResult["slots"]>;
 export default _default;
 type __VLS_WithTemplateSlots<T, S> = T & {
