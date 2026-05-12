@@ -25,7 +25,9 @@ const props = withDefaults(
     }>
     deleteUrl?: string
     description?: string
+    header?: boolean
     paginationShow?: boolean
+    selectionShow?: boolean
     setRelations?: Array<string>
     setColumns?: Array<string>
     setQueries?: Query['queries']
@@ -41,7 +43,9 @@ const props = withDefaults(
     buttonMoreFieldShow: true,
     buttonFilterShow: true,
     buttonDeleteShow: true,
+    header: true,
     paginationShow: true,
+    selectionShow: true,
     toolbarShow: true,
   },
 )
@@ -151,7 +155,7 @@ defineExpose({ changeSelection, refresh, remove })
 <template>
   <div>
     <!-- Header -->
-    <div class="flex justify-between p-4 border-b border-[#ebeef5]">
+    <div v-if="props.header" class="flex justify-between p-4 border-b border-[#ebeef5]">
       <!-- Title -->
       <div v-if="!$slots.title">
         <div class="text-xl font-bold">{{ props.title }}</div>
@@ -189,7 +193,7 @@ defineExpose({ changeSelection, refresh, remove })
       row-key="id"
       style="width: 100%"
     >
-      <el-table-column type="selection" width="55" fixed="left" />
+      <el-table-column v-if="props.selectionShow" type="selection" width="55" fixed="left" />
       <template v-for="(column, index) of props.columns" :key="index">
         <el-table-column
           v-if="!column.value && column.type !== 'slot'"
