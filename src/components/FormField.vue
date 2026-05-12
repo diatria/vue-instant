@@ -136,7 +136,4 @@ const handleChange = (val: any) => {
     :model-value="modelValue"
     @update:model-value="handleChange"
   />
-
-  <!-- Slot -->
-  <slot v-else-if="column.type === 'slot'" :column="column" :model-value="modelValue" />
 </template>

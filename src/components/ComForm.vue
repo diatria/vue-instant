@@ -1,9 +1,5 @@
 <script lang="ts" setup>
-import {
-  httpHandleError,
-  message,
-  resolveUrl,
-} from '../utils/helpers'
+import { httpHandleError, message, resolveUrl } from '../utils/helpers'
 import { Close, Promotion } from '@element-plus/icons-vue'
 import type {
   FormInstance,
@@ -260,11 +256,10 @@ defineExpose({
                 :column="column"
                 v-model="form[column.name]"
                 @change="(val: any) => onChange(column, val)"
-              >
-                <template #slot="slotProps">
-                  <slot :name="column.name" :form="form" />
-                </template>
-              </FormField>
+              ></FormField>
+
+              <!-- Slot -->
+              <slot v-if="column.type === 'slot'" :name="column.name" :form="form" />
             </el-form-item>
 
             <!-- Checkbox without label (special case) -->
@@ -277,11 +272,7 @@ defineExpose({
             </el-form-item>
 
             <!-- Upload with manual submit (special handling) -->
-            <el-form-item
-              v-if="column.type === 'upload'"
-              :label="column.label"
-              :prop="column.name"
-            >
+            <el-form-item v-if="column.type === 'upload'" :label="column.label" :prop="column.name">
               <el-upload
                 :ref="
                   (el: any) => {
@@ -314,9 +305,18 @@ defineExpose({
       </el-row>
 
       <div class="flex justify-end border-t border-slate-200 border-solid pt-4">
-        <el-button :icon="Close" @click="emits('back')" type="danger" plain :disabled="loading">Batal</el-button>
+        <el-button :icon="Close" @click="emits('back')" type="danger" plain :disabled="loading"
+          >Batal</el-button
+        >
 
-        <el-button v-if="props.id" @click="update" :icon="Promotion" type="primary" class="ml-4" :loading="loading">
+        <el-button
+          v-if="props.id"
+          @click="update"
+          :icon="Promotion"
+          type="primary"
+          class="ml-4"
+          :loading="loading"
+        >
           Perbaharui
         </el-button>
 
