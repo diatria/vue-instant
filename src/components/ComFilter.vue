@@ -1,43 +1,61 @@
 <script lang="ts" setup>
-import { type ComFormColumn } from '../types'
-import { type UploadInstance } from 'element-plus'
-import { Check, Close, Promotion, RefreshLeft } from '@element-plus/icons-vue'
+import { Query, type ComFormColumn } from '../types'
+import { Check, Close, Filter, Promotion, RefreshLeft } from '@element-plus/icons-vue'
 import { reactive, ref, nextTick } from 'vue'
 import ComSelect from './ComSelect.vue'
 
 export interface ComFormProps {
+  buttonFilterLoading?: boolean
   columns: ComFormColumn[]
 }
 
-const props = defineProps<ComFormProps>()
-const popoverFilter = ref()
+interface ChangeItemPayload extends Omit<ComFormColumn, 'value'> {
+  value: unknown
+}
 
-const emits = defineEmits(['cancel', 'onSubmit', 'onReset', 'form', 'onChangeItem'])
+type FormRecord = Record<string, string | number | boolean | undefined>
+type BreakPoint = 'default' | 'sm' | 'md' | 'lg' | 'xl'
+
+const props = defineProps<ComFormProps>()
+const popoverFilter = ref<boolean>(false)
+
+const emits = defineEmits<{
+  cancel: []
+  onSubmit: [queries: Query['queries']]
+  onReset: []
+  form: [payload: FormRecord]
+  onChangeItem: [payload: ChangeItemPayload]
+}>()
+
 defineExpose({
   reEmitForm,
 })
 
-const form: Record<string, string | number | UploadInstance | Array<string | number>> = reactive({})
+const form: FormRecord = reactive({})
 
 function columnGrid(
   column: number | Record<string, number>,
-  breakPoint?: 'default' | 'sm' | 'md' | 'lg' | 'xl',
-) {
+  breakPoint?: BreakPoint,
+): number | undefined {
   if (typeof column === 'number') return column
   if (typeof column === 'object' && breakPoint) return column[breakPoint]
   if (typeof column === 'object') return column['default']
 }
 
-function onChange(columnMetaData: ComFormColumn, inputValue: unknown) {
+function onChange(columnMetaData: ComFormColumn, inputValue: unknown): void {
   emits('form', form)
   emits('onChangeItem', { ...columnMetaData, value: inputValue })
 }
 
-function reEmitForm() {
+function onSubmit(): void {
+  emits('onSubmit', toQuery())
+}
+
+function reEmitForm(): void {
   emits('form', form)
 }
 
-async function resetForm() {
+async function resetForm(): Promise<void> {
   Object.keys(form).forEach((key) => {
     delete form[key]
   })
@@ -47,10 +65,29 @@ async function resetForm() {
   emits('form', form)
   emits('onReset')
 }
+
+function toQuery(): Query['queries'] {
+  const queries: Query['queries'] = []
+  Object.keys(form).forEach((key) => {
+    queries.push({
+      field: key,
+      value: form[key],
+    })
+  })
+
+  return queries
+}
 </script>
 <template>
-  <el-button @click="popoverFilter = !popoverFilter" class="m-0!">Filter</el-button>
-  <el-drawer v-model="popoverFilter" title="Filter" direction="rtl" size="20%">
+  <el-button :icon="Filter" @click="popoverFilter = !popoverFilter" class="m-0!">Filter</el-button>
+  <el-drawer
+    v-model="popoverFilter"
+    :show-close="false"
+    header-class="!mb-0"
+    title="Filter"
+    direction="rtl"
+    size="20%"
+  >
     <el-form :model="form" ref="ruleFormRef" label-position="top" label-width="auto" status-icon>
       <el-row :gutter="20">
         <template v-for="(column, index) in props.columns" :key="index">
@@ -202,7 +239,13 @@ async function resetForm() {
           >Batal</el-button
         >
         <el-button :icon="RefreshLeft" @click="resetForm" type="primary" plain>Reset</el-button>
-        <el-button @click="emits('onSubmit')" :icon="Promotion" type="primary" class="ml-4">
+        <el-button
+          @click="onSubmit"
+          :loading="buttonFilterLoading"
+          :icon="Promotion"
+          type="primary"
+          class="ml-4"
+        >
           Filter
         </el-button>
       </div>
