@@ -2,7 +2,7 @@
 import type { Pagination, Query } from '../types'
 import type { RouteLocationRaw } from 'vue-router'
 import { onMounted, reactive, ref } from 'vue'
-import { httpDelete, httpHandleError, resolveUrl } from '../utils/helpers'
+import { httpHandleError, resolveUrl } from '../utils/helpers'
 import { Delete, Edit, MoreFilled, Plus, View } from '@element-plus/icons-vue'
 import { HttpBuilder } from '../utils/http'
 
@@ -73,8 +73,6 @@ function changePage() {
 }
 
 function changeSelection(values: number[]) {
-  // dataSelected.value = values
-  // emits('tableSelections', values)
   values.map((id) => {
     tableRef.value!.toggleRowSelection({ id })
   })
@@ -133,11 +131,13 @@ function remove() {
   const ids = dataSelected.value.map((item) => {
     return (item as { id: number | string }).id
   })
-  httpDelete(resolveUrl(props.deleteUrl), {
-    data: {
-      id: ids,
-    },
-  })
+
+  http
+    .delete(resolveUrl(props.deleteUrl), {
+      data: {
+        id: ids,
+      },
+    })
     .then(() => {
       refresh()
       dialogDeleteConfirmation.value = false

@@ -14,8 +14,6 @@ export function setAppConfig(cfg: AppConfig) {
 }
 
 export function getAppConfig(): AppConfig {
-  if (!config) {
-    throw new Error('RuntimeConfig belum di-set. Pastikan setAppConfig dipanggil di main.ts')
-  }
-  return config
+  if (!config) throw new Error('App config is not initialized. Did you forget to call setAppConfig() in vue-instant ?');
+  return config;
 }

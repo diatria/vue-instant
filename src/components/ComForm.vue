@@ -1,14 +1,10 @@
 <script lang="ts" setup>
 import {
-  httpGet,
   httpHandleError,
-  httpPost,
-  httpPut,
-  httpValidation,
   message,
   resolveUrl,
 } from '../utils/helpers'
-import { Check, Close, Promotion } from '@element-plus/icons-vue'
+import { Close, Promotion } from '@element-plus/icons-vue'
 import type {
   FormInstance,
   FormRules,
@@ -18,64 +14,18 @@ import type {
 } from 'element-plus'
 import { genFileId } from 'element-plus'
 import { onBeforeMount, onMounted, reactive, ref } from 'vue'
-import ComSelect from './ComSelect.vue'
-import type { Query } from '../types'
+import FormField from './FormField.vue'
+import type { ComFormColumn, ComFormProps as ComFormPropsType } from '../types'
+import { HttpBuilder } from '../utils/http'
 import { get } from 'lodash'
 
-type ColumnSelect = {
-  options?: Array<unknown>
-  url?: string
-  field_label?: string | ((row: Record<string, unknown>) => string)
-  field_value?: string
-  field_search_column?: string
-  fetch_on_click?: boolean
-  remote?: boolean
-}
-
-type ColumnUpload = {
-  url: string
-}
-
-type ColumnType =
-  | 'text'
-  | 'textarea'
-  | 'select'
-  | 'radio'
-  | 'password'
-  | 'switch'
-  | 'checkbox:label'
-  | 'checkbox'
-  | 'date'
-  | 'date-time'
-  | 'time'
-  | 'upload'
-  | 'slot'
-  | 'slot:el-form-item'
-  | 'hide'
-
-interface Column {
-  name: string
-  label?: string
-  type: ColumnType
-  grid?: number | Record<string, number>
-  value?: string | number | UploadInstance | (() => string)
-  disabled?: boolean
-  select?: ColumnSelect
-  options?: {
-    value: string | number | boolean
-    label: string
-  }[]
-  upload?: ColumnUpload
-  placeholder?: string
-}
-
 interface ComFormProps {
-  columns: Column[]
+  columns: ComFormColumn[]
   id?: number
   description?: string
   fetchUrl?: string // only for fetch data
   paramsUrl?: string
-  queries?: Query
+  queries?: ComFormPropsType['queries']
   relations?: string[]
   rules?: FormRules
   storeUrl?: string // for store or update data
@@ -92,6 +42,8 @@ const form: Record<
 > = reactive({})
 const ruleFormRef = ref<FormInstance>()
 const uploadRefs: Record<string, UploadInstance> = {}
+const loading = ref(false)
+const http = new HttpBuilder()
 
 function columnGrid(
   column: number | Record<string, number>,
@@ -105,15 +57,15 @@ function columnGrid(
 /**
  * Mengambil data untuk ditampilkan di form
  */
-
 function getData() {
   const url = resolveUrl(props.fetchUrl ?? props.url)
-  httpGet<{ data: unknown }>(`${url}/${props.id}`, {
-    params: {
-      queries: props.queries,
-      relations: props.relations,
-    },
-  })
+  http
+    .get<{ data: unknown }>(`${url}/${props.id}`, {
+      params: {
+        queries: props.queries,
+        relations: props.relations,
+      },
+    })
     .then((result) => {
       Object.assign(form, result.data.data)
 
@@ -141,6 +93,15 @@ const handleExceed = (files: File[], uploadFiles: UploadFile[], columnName?: str
   uploadRef.handleStart(file)
 }
 
+const handleUploadError = (error: any, columnName: string) => {
+  const errorMsg = error.message || 'Unknown error'
+  message(`Upload ${columnName} gagal: ${errorMsg}`, 'error')
+}
+
+const handleUploadSuccess = (response: any, columnName: string) => {
+  message(`Upload ${columnName} berhasil`, 'success')
+}
+
 function initializeForm() {
   props.columns.forEach((column) => {
     if (column.type === 'select') {
@@ -149,31 +110,18 @@ function initializeForm() {
       } else form[column.name] = column.value ?? ''
     } else if (column.type === 'upload') {
       form[column.name] = column.value ?? ''
-    } else if (column.type === 'radio') {
-      form[column.name] = column.value ?? ''
-    } else if (column.type === 'text') {
-      form[column.name] = column.value ?? ''
-    } else if (column.type === 'textarea') {
-      form[column.name] = column.value ?? ''
-    } else if (column.type === 'password') {
-      form[column.name] = column.value ?? ''
-    } else if (column.type === 'switch') {
-      form[column.name] = column.value ?? 0
     } else if (column.type === 'checkbox') {
       form[column.name] = column.value ?? []
-    } else if (column.type === 'date') {
-      form[column.name] = column.value ?? ''
-    } else if (column.type === 'date-time') {
-      form[column.name] = column.value ?? ''
-    } else if (column.type === 'slot') {
-      form[column.name] = column.value ?? ''
-    } else if (column.type === 'hide') {
+    } else if (column.type === 'switch') {
+      form[column.name] = column.value ?? 0
+    } else {
+      // text, textarea, password, radio, date, date-time, time, slot, hide
       form[column.name] = column.value ?? ''
     }
   })
 }
 
-function onChange(columnMetaData: Column, inputValue: unknown) {
+function onChange(columnMetaData: ComFormColumn, inputValue: unknown) {
   emits('form', form)
   emits('onChangeItem', { ...columnMetaData, value: inputValue })
 }
@@ -198,26 +146,32 @@ async function submitAllUploads() {
 async function store() {
   // Validation form input
   if (!ruleFormRef.value) return
+  if (loading.value) return // prevent duplicate submission
 
   let url = resolveUrl(props.storeUrl ?? props.url)
   await ruleFormRef.value.validate(async (valid) => {
     if (props.paramsUrl) url = `${url}?${props.paramsUrl}`
     if (valid) {
+      loading.value = true
       try {
         // Upload all files first
         await submitAllUploads()
 
         // Then submit the form
-        httpPost(url, form)
+        await http
+          .post(url, form)
           .then((result) => {
-            if (httpValidation(result)) {
-              message(result.data.message, 'success')
-              emits('onStored', result.data.data)
+            if (result.status >= 200 && result.status < 300) {
+              const data = result.data as any
+              message(data.message, 'success')
+              emits('onStored', data.data)
             }
           })
           .catch(httpHandleError)
       } catch (error) {
         httpHandleError(error)
+      } finally {
+        loading.value = false
       }
     }
   })
@@ -225,20 +179,29 @@ async function store() {
 
 async function update() {
   if (!ruleFormRef.value) return
+  if (loading.value) return // prevent duplicate submission
 
   let url = resolveUrl(props.storeUrl ?? props.url)
   url = `${url}/${props.id}`
   if (props.paramsUrl) url = `${url}?${props.paramsUrl}`
+  loading.value = true
   await ruleFormRef.value.validate((valid) => {
     if (valid) {
-      httpPut(url, form)
+      http
+        .put(url, form)
         .then((result) => {
-          if (httpValidation(result)) {
-            message(result.data.message, 'success')
-            emits('onUpdated', result.data.data)
+          if (result.status >= 200 && result.status < 300) {
+            const data = result.data as any
+            message(data.message, 'success')
+            emits('onUpdated', data.data)
           }
         })
         .catch(httpHandleError)
+        .finally(() => {
+          loading.value = false
+        })
+    } else {
+      loading.value = false
     }
   })
 }
@@ -287,129 +250,42 @@ defineExpose({
             :lg="columnGrid(column.grid ?? 24, 'lg')"
             :xl="columnGrid(column.grid ?? 24, 'xl')"
           >
+            <!-- Standard form item with label -->
             <el-form-item
-              v-if="!['slot:el-form-item'].includes(column.type)"
+              v-if="!['slot:el-form-item', 'checkbox'].includes(column.type)"
               :label="column.label"
               :prop="column.name"
             >
-              <!-- Type Text -->
-              <el-input
-                v-if="column.type === 'text'"
-                v-model="form[column.name]"
-                :disabled="column.disabled"
-                :placeholder="column.placeholder"
-                @change="(val: any) => onChange(column, val)"
-              />
-
-              <!-- Type Textarea -->
-              <el-input
-                v-if="column.type === 'textarea'"
-                v-model="form[column.name]"
-                type="textarea"
-                :disabled="column.disabled"
-                :placeholder="column.placeholder"
-                @change="(val: any) => onChange(column, val)"
-              />
-
-              <!-- Type Select -->
-              <ComSelect
-                v-if="column.type === 'select'"
-                v-model="form[column.name]"
-                :disabled="column.disabled"
-                :fetch-on-click="column.select?.fetch_on_click"
-                :field-label="column.select?.field_label ?? 'name'"
-                :field-value="column.select?.field_value ?? 'id'"
-                :field-search-column="column.select?.field_search_column"
-                :options="column.select?.options"
-                :placeholder="column.placeholder"
-                :remote="column.select?.remote"
-                :url="column.select?.url"
-                @change="(val: any) => onChange(column, val)"
-              />
-
-              <!-- Radio -->
-              <el-radio-group
-                v-if="column.type === 'radio'"
+              <FormField
+                :column="column"
                 v-model="form[column.name]"
                 @change="(val: any) => onChange(column, val)"
               >
-                <el-radio
-                  v-for="(radio, index) in column.options"
-                  :value="radio.value"
-                  :key="`radio-${index}`"
-                  >{{ radio.label }}</el-radio
-                >
-              </el-radio-group>
+                <template #slot="slotProps">
+                  <slot :name="column.name" :form="form" />
+                </template>
+              </FormField>
+            </el-form-item>
 
-              <!-- Checkbox -->
-              <el-checkbox-group
-                v-if="column.type === 'checkbox:label' && column.options?.length"
+            <!-- Checkbox without label (special case) -->
+            <el-form-item v-if="column.type === 'checkbox' && !column.options" :prop="column.name">
+              <FormField
+                :column="column"
                 v-model="form[column.name]"
                 @change="(val: any) => onChange(column, val)"
-              >
-                <el-checkbox
-                  v-for="(checkbox, index) in column.options"
-                  :label="checkbox.label"
-                  :value="checkbox.value"
-                  :key="`checkbox-${index}`"
-                />
-              </el-checkbox-group>
-
-              <!-- Type Password -->
-              <el-input
-                v-if="column.type === 'password'"
-                v-model="form[column.name]"
-                :placeholder="column.placeholder"
-                @change="(val: any) => onChange(column, val)"
-                type="password"
-                show-password
               />
+            </el-form-item>
 
-              <!-- Type Switch -->
-              <el-switch
-                v-if="column.type === 'switch'"
-                v-model="form[column.name]"
-                @change="(val: any) => onChange(column, val)"
-                :active-icon="Check"
-                :inactive-icon="Close"
-              />
-
-              <!-- Type Date -->
-              <el-date-picker
-                v-if="column.type === 'date'"
-                v-model="form[column.name]"
-                @change="(val: any) => onChange(column, val)"
-                type="date"
-                :placeholder="column.placeholder"
-              />
-
-              <!-- Type Date Time -->
-              <el-date-picker
-                v-if="column.type === 'date-time'"
-                v-model="form[column.name]"
-                @change="(val: any) => onChange(column, val)"
-                :placeholder="column.placeholder"
-                type="datetime"
-                value-format="YYYY-MM-DD HH:mm:ss"
-                class="w-full!"
-              />
-
-              <!-- Type Time -->
-              <el-time-picker
-                v-if="column.type === 'time'"
-                v-model="form[column.name]"
-                :placeholder="column.placeholder"
-                @change="(val: any) => onChange(column, val)"
-                value-format="HH:mm:ss"
-                class="w-full!"
-              />
-
-              <!-- Type File Upload -->
+            <!-- Upload with manual submit (special handling) -->
+            <el-form-item
+              v-if="column.type === 'upload'"
+              :label="column.label"
+              :prop="column.name"
+            >
               <el-upload
-                v-if="column.type === 'upload'"
                 :ref="
                   (el: any) => {
-                    if (el) uploadRefs[column.name] = el as any
+                    if (el) uploadRefs[column.name] = el
                   }
                 "
                 :action="column.upload?.url"
@@ -417,6 +293,8 @@ defineExpose({
                 :on-exceed="(files: File[]) => handleExceed(files, [], column.name)"
                 :auto-upload="false"
                 @change="(val: any) => onChange(column, val)"
+                @error="(err: any) => handleUploadError(err, column.name)"
+                @success="(res: any) => handleUploadSuccess(res, column.name)"
               >
                 <template #trigger>
                   <el-button type="primary">select file</el-button>
@@ -427,29 +305,18 @@ defineExpose({
                   </div>
                 </template>
               </el-upload>
-
-              <!-- Type Inject Html -->
-              <slot v-if="column.type === 'slot'" :name="column.name" :form="form" />
             </el-form-item>
 
-            <!-- Checkbox without label -->
-            <el-form-item v-if="column.type === 'checkbox' && !column.options" :prop="column.name">
-              <el-checkbox
-                v-if="column.type === 'checkbox'"
-                v-model="form[column.name]"
-                @change="(val: any) => onChange(column, val)"
-              />
-            </el-form-item>
-
+            <!-- Custom slot form item (full control) -->
             <slot v-if="column.type === 'slot:el-form-item'" :name="column.name" :form="form" />
           </el-col>
         </template>
       </el-row>
 
       <div class="flex justify-end border-t border-slate-200 border-solid pt-4">
-        <el-button :icon="Close" @click="emits('back')" type="danger" plain>Batal</el-button>
+        <el-button :icon="Close" @click="emits('back')" type="danger" plain :disabled="loading">Batal</el-button>
 
-        <el-button v-if="props.id" @click="update" :icon="Promotion" type="primary" class="ml-4">
+        <el-button v-if="props.id" @click="update" :icon="Promotion" type="primary" class="ml-4" :loading="loading">
           Perbaharui
         </el-button>
 
@@ -460,6 +327,7 @@ defineExpose({
             :icon="Promotion"
             type="primary"
             class="ml-4"
+            :loading="loading"
           >
             Simpan
           </el-button>

@@ -2,7 +2,7 @@
 import { Query, type ComFormColumn } from '../types'
 import { Check, Close, Filter, Promotion, RefreshLeft } from '@element-plus/icons-vue'
 import { reactive, ref, nextTick } from 'vue'
-import ComSelect from './ComSelect.vue'
+import FormField from './FormField.vue'
 
 export interface ComFormProps {
   buttonFilterLoading?: boolean
@@ -99,136 +99,33 @@ function toQuery(): Query['queries'] {
             :lg="columnGrid(column.grid ?? 24, 'lg')"
             :xl="columnGrid(column.grid ?? 24, 'xl')"
           >
+            <!-- Standard form item with label -->
             <el-form-item
-              v-if="!['slot:el-form-item'].includes(column.type)"
+              v-if="!['slot:el-form-item', 'checkbox'].includes(column.type)"
               :label="column.label"
               :prop="column.name"
             >
-              <!-- Type Text -->
-              <el-input
-                v-if="column.type === 'text'"
-                v-model="form[column.name]"
-                :disabled="column.disabled"
-                :placeholder="column.placeholder"
-                @change="(val: any) => onChange(column, val)"
-              />
-
-              <!-- Type Textarea -->
-              <el-input
-                v-if="column.type === 'textarea'"
-                v-model="form[column.name]"
-                type="textarea"
-                :disabled="column.disabled"
-                :placeholder="column.placeholder"
-                @change="(val: any) => onChange(column, val)"
-              />
-
-              <!-- Type Select -->
-              <ComSelect
-                v-if="column.type === 'select'"
-                v-model="form[column.name]"
-                :disabled="column.disabled"
-                :fetch-on-click="column.select?.fetch_on_click"
-                :field-label="column.select?.field_label ?? 'name'"
-                :field-value="column.select?.field_value ?? 'id'"
-                :field-search-column="column.select?.field_search_column"
-                :options="column.select?.options"
-                :placeholder="column.placeholder"
-                :remote="column.select?.remote"
-                :url="column.select?.url"
-                @change="(val: any) => onChange(column, val)"
-              />
-
-              <!-- Radio -->
-              <el-radio-group
-                v-if="column.type === 'radio'"
+              <FormField
+                :column="column"
                 v-model="form[column.name]"
                 @change="(val: any) => onChange(column, val)"
               >
-                <el-radio
-                  v-for="(radio, index) in column.options"
-                  :value="radio.value"
-                  :key="`radio-${index}`"
-                  >{{ radio.label }}</el-radio
-                >
-              </el-radio-group>
-
-              <!-- Checkbox -->
-              <el-checkbox-group
-                v-if="column.type === 'checkbox:label' && column.options?.length"
-                v-model="form[column.name]"
-                @change="(val: any) => onChange(column, val)"
-              >
-                <el-checkbox
-                  v-for="(checkbox, index) in column.options"
-                  :label="checkbox.label"
-                  :value="checkbox.value"
-                  :key="`checkbox-${index}`"
-                />
-              </el-checkbox-group>
-
-              <!-- Type Password -->
-              <el-input
-                v-if="column.type === 'password'"
-                v-model="form[column.name]"
-                :placeholder="column.placeholder"
-                @change="(val: any) => onChange(column, val)"
-                type="password"
-                show-password
-              />
-
-              <!-- Type Switch -->
-              <el-switch
-                v-if="column.type === 'switch'"
-                v-model="form[column.name]"
-                @change="(val: any) => onChange(column, val)"
-                :active-icon="Check"
-                :inactive-icon="Close"
-              />
-
-              <!-- Type Date -->
-              <el-date-picker
-                v-if="column.type === 'date'"
-                v-model="form[column.name]"
-                @change="(val: any) => onChange(column, val)"
-                type="date"
-                :placeholder="column.placeholder"
-              />
-
-              <!-- Type Date Time -->
-              <el-date-picker
-                v-if="column.type === 'date-time'"
-                v-model="form[column.name]"
-                @change="(val: any) => onChange(column, val)"
-                :placeholder="column.placeholder"
-                type="datetime"
-                value-format="YYYY-MM-DD HH:mm:ss"
-                class="w-full!"
-              />
-
-              <!-- Type Time -->
-              <el-time-picker
-                v-if="column.type === 'time'"
-                v-model="form[column.name]"
-                :placeholder="column.placeholder"
-                @change="(val: any) => onChange(column, val)"
-                value-format="HH:mm:ss"
-                class="w-full!"
-              />
-
-              <!-- Type Inject Html -->
-              <slot v-if="column.type === 'slot'" :name="column.name" :form="form" />
+                <template #slot="slotProps">
+                  <slot :name="column.name" :form="form" />
+                </template>
+              </FormField>
             </el-form-item>
 
             <!-- Checkbox without label -->
             <el-form-item v-if="column.type === 'checkbox' && !column.options" :prop="column.name">
-              <el-checkbox
-                v-if="column.type === 'checkbox'"
+              <FormField
+                :column="column"
                 v-model="form[column.name]"
                 @change="(val: any) => onChange(column, val)"
               />
             </el-form-item>
 
+            <!-- Custom slot form item -->
             <slot v-if="column.type === 'slot:el-form-item'" :name="column.name" :form="form" />
           </el-col>
         </template>
