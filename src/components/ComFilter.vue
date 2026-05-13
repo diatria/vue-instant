@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { Query, type ComFormColumn } from '../types'
-import { Check, Close, Filter, Promotion, RefreshLeft } from '@element-plus/icons-vue'
+import { type Query, type ComFormColumn } from '../types'
+import { Close, Filter, Promotion, RefreshLeft } from '@element-plus/icons-vue'
 import { reactive, ref, nextTick } from 'vue'
 import FormField from './FormField.vue'
 
@@ -110,10 +110,9 @@ function toQuery(): Query['queries'] {
                 v-model="form[column.name]"
                 @change="(val: any) => onChange(column, val)"
               >
-                <template #slot="slotProps">
-                  <slot :name="column.name" :form="form" />
-                </template>
               </FormField>
+              <!-- Slot -->
+              <slot v-if="column.type === 'slot'" :name="column.name" :form="form" />
             </el-form-item>
 
             <!-- Checkbox without label -->
