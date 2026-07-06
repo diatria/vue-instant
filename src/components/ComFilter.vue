@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { type Query, type ComFormColumn } from '../types'
+import type { Query, ComFormColumn } from '../types'
 import { Close, Filter, Promotion, RefreshLeft } from '@element-plus/icons-vue'
 import { reactive, ref, nextTick } from 'vue'
 import FormField from './FormField.vue'
