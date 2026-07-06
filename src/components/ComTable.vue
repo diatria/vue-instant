@@ -6,7 +6,7 @@ import { httpHandleError, resolveUrl } from '../utils/helpers'
 import { Delete, Edit, MoreFilled, Plus, View } from '@element-plus/icons-vue'
 import { HttpBuilder } from '../utils/http'
 
-const emits = defineEmits(['onReady', 'tableSelections'])
+const emits = defineEmits(['onReady', 'tableSelections', 'tableSelectionRaw'])
 const props = withDefaults(
   defineProps<{
     buttonCreateUrl?: () => RouteLocationRaw
@@ -108,10 +108,15 @@ function fetchingDataFromServer() {
 
 function handleSelectionChange(val: Array<{ id: number | string }>) {
   dataSelected.value = val
+  
+  // Emit the selected IDs to the parent component
   emits(
     'tableSelections',
     val.map((item) => item.id),
   )
+
+  // Emit the raw selected rows to the parent component
+  emits('tableSelectionRaw', val)
 }
 
 function refresh() {
