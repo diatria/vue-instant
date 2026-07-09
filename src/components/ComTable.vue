@@ -284,7 +284,7 @@ defineExpose({ changeSelection, refresh, remove })
     </el-table>
 
     <!-- Pagination -->
-    <div class="flex justify-end p-4">
+    <div class="flex justify-end p-4 gap-4">
       <slot name="footer-1"></slot>
       <el-pagination
         v-if="props.paginationShow"
