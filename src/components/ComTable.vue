@@ -284,8 +284,8 @@ defineExpose({ changeSelection, refresh, remove })
     </el-table>
 
     <!-- Pagination -->
-    <slot name="footer-1"></slot>
     <div class="flex justify-end p-4">
+      <slot name="footer-1"></slot>
       <el-pagination
         v-if="props.paginationShow"
         v-model:page-size="pageSize"
@@ -295,8 +295,8 @@ defineExpose({ changeSelection, refresh, remove })
         @change="changePage"
         layout="sizes, total, prev, pager, next"
       />
+      <slot name="footer-2"></slot>
     </div>
-    <slot name="footer-2"></slot>
 
     <!-- Dialog delete confirmation -->
     <el-dialog v-model="dialogDeleteConfirmation" title="Konfirmasi" width="500">
