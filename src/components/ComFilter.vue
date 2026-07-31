@@ -86,7 +86,7 @@ function toQuery(): Query['queries'] {
     header-class="!mb-0"
     title="Filter"
     direction="rtl"
-    size="20%"
+    class="w-87!"
   >
     <el-form :model="form" ref="ruleFormRef" label-position="top" label-width="auto" status-icon>
       <el-row :gutter="20">
