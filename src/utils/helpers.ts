@@ -392,9 +392,12 @@ export function replaceString(text: string, data: Record<string, unknown>) {
   const regex = /\{(\w+?)\}/g
 
   const matches: string[] = []
-  let match
+  let match: RegExpExecArray | null
   while ((match = regex.exec(text)) !== null) {
-    matches.push(match[1])
+    const value = match[1]
+    if (value !== undefined) {
+      matches.push(value)
+    }
   }
 
   let finalText = text
