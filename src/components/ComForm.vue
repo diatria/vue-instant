@@ -106,7 +106,7 @@ function initializeForm() {
       } else form[column.name] = column.value ?? ''
     } else if (column.type === 'upload') {
       form[column.name] = column.value ?? ''
-    } else if (column.type === 'checkbox') {
+    } else if (column.type === 'checkbox' || column.type === 'checkbox:label') {
       form[column.name] = column.value ?? []
     } else if (column.type === 'switch') {
       form[column.name] = column.value ?? 0
