@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { httpHandleError, message, resolveUrl } from '../utils/helpers'
-import { Close, Promotion } from '@element-plus/icons-vue'
+import { Close, Promotion, Upload } from '@element-plus/icons-vue'
 import type {
   FormInstance,
   FormRules,
@@ -150,14 +150,14 @@ async function store() {
     if (valid) {
       loading.value = true
       try {
-        // Upload all files first
-        await submitAllUploads()
-
         // Then submit the form
         await http
           .post(url, form)
           .then((result) => {
             if (result.status >= 200 && result.status < 300) {
+              // Upload all file
+              submitAllUploads()
+
               const data = result.data as any
               message(data.message, 'success')
               emits('onStored', data.data)
@@ -181,12 +181,15 @@ async function update() {
   url = `${url}/${props.id}`
   if (props.paramsUrl) url = `${url}?${props.paramsUrl}`
   loading.value = true
-  await ruleFormRef.value.validate((valid) => {
+  await ruleFormRef.value.validate(async (valid) => {
     if (valid) {
       http
         .put(url, form)
         .then((result) => {
           if (result.status >= 200 && result.status < 300) {
+            // Upload all file
+            submitAllUploads()
+
             const data = result.data as any
             message(data.message, 'success')
             emits('onUpdated', data.data)
@@ -248,7 +251,7 @@ defineExpose({
           >
             <!-- Standard form item with label -->
             <el-form-item
-              v-if="!['slot:el-form-item', 'checkbox'].includes(column.type)"
+              v-if="!['slot:el-form-item', 'upload', 'checkbox'].includes(column.type)"
               :label="column.label"
               :prop="column.name"
             >
@@ -283,16 +286,21 @@ defineExpose({
                 :limit="1"
                 :on-exceed="(files: File[]) => handleExceed(files, [], column.name)"
                 :auto-upload="false"
+                :accept="column.upload?.accept"
+                :name="column.name"
                 @change="(val: any) => onChange(column, val)"
                 @error="(err: any) => handleUploadError(err, column.name)"
                 @success="(res: any) => handleUploadSuccess(res, column.name)"
+                class="w-full"
               >
                 <template #trigger>
-                  <el-button type="primary">select file</el-button>
+                  <el-button :icon="Upload" type="primary">{{
+                    column?.upload?.buttonText ?? 'Select File'
+                  }}</el-button>
                 </template>
                 <template #tip>
                   <div class="el-upload__tip text-red">
-                    limit 1 file, new file will cover the old file
+                    {{ column.placeholder }}
                   </div>
                 </template>
               </el-upload>

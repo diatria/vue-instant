@@ -37,7 +37,9 @@ export interface ComFormColumnSelect {
 }
 
 export interface ComFormColumnUpload {
-  url: string
+  url: string,
+  buttonText?: string
+  accept?: string
 }
 
 export type ComFormColumnType =
