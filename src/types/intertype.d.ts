@@ -22,7 +22,19 @@ export interface ComSelectProps {
   field_value?: string
   field_search_column?: string
   placeholder?: string
-  placement?: 'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end' | 'right' | 'right-start' | 'right-end'
+  placement?:
+    | 'top'
+    | 'top-start'
+    | 'top-end'
+    | 'bottom'
+    | 'bottom-start'
+    | 'bottom-end'
+    | 'left'
+    | 'left-start'
+    | 'left-end'
+    | 'right'
+    | 'right-start'
+    | 'right-end'
   remote?: boolean
 }
 
@@ -37,7 +49,7 @@ export interface ComFormColumnSelect {
 }
 
 export interface ComFormColumnUpload {
-  url: string,
+  url: string
   buttonText?: string
   accept?: string
 }
@@ -72,6 +84,19 @@ export interface ComFormColumn {
     label: string
   }[]
   upload?: ComFormColumnUpload
+  date?: {
+    value_format: string
+  }
+  checkbox?: {
+    options?: {
+      value: string | number | boolean
+      label: string
+    }[]
+    option?: {
+      value: string | number | boolean
+      label: string
+    }
+  }
   placeholder?: string
 }
 

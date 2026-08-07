@@ -69,17 +69,25 @@ const handleChange = (val: any) => {
 
   <!-- Checkbox with labels -->
   <el-checkbox-group
-    v-else-if="column.type === 'checkbox:label' && column.options?.length"
+    v-else-if="column.type === 'checkbox:label' && column.checkbox?.options"
     :model-value="modelValue"
     @update:model-value="handleChange"
   >
     <el-checkbox
-      v-for="(checkbox, index) in column.options"
+      v-if="column.checkbox?.options"
+      v-for="(checkbox, index) in column.checkbox?.options"
       :label="checkbox.label"
       :value="checkbox.value"
       :key="`checkbox-${index}`"
     />
   </el-checkbox-group>
+
+  <el-checkbox
+    v-else-if="column.type === 'checkbox:label' && column.checkbox?.option"
+    :model-value="modelValue"
+    :label="column.checkbox?.option.label"
+    :value="column.checkbox?.option.value"
+  />
 
   <!-- Type Password -->
   <el-input
@@ -104,9 +112,11 @@ const handleChange = (val: any) => {
   <el-date-picker
     v-else-if="column.type === 'date'"
     :model-value="modelValue"
+    :placeholder="column.placeholder"
+    :value-format="column.date?.value_format"
     @update:model-value="handleChange"
     type="date"
-    :placeholder="column.placeholder"
+    class="w-full!"
   />
 
   <!-- Type Date Time -->
