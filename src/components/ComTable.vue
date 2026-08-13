@@ -29,6 +29,7 @@ const props = withDefaults(
     paginationShow?: boolean
     selectionShow?: boolean
     setRelations?: Array<string>
+    setRelationsCount: Array<string>
     setColumns?: Array<string>
     setQueries?: Query['queries']
     setOrder?: string
@@ -84,6 +85,7 @@ function fetchingDataFromServer() {
     .get<{ data: Pagination<Record<string, unknown>> }>(resolveUrl(props.url), {
       params: {
         relations: props.setRelations,
+        relations_count: props.setRelationsCount,
         columns: props.setColumns,
         pagination_length: pageSize.value,
         page: currentPage.value,
@@ -108,7 +110,7 @@ function fetchingDataFromServer() {
 
 function handleSelectionChange(val: Array<{ id: number | string }>) {
   dataSelected.value = val
-  
+
   // Emit the selected IDs to the parent component
   emits(
     'tableSelections',
