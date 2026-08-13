@@ -29,7 +29,7 @@ const props = withDefaults(
     paginationShow?: boolean
     selectionShow?: boolean
     setRelations?: Array<string>
-    setRelationsCount: Array<string>
+    setRelationsCount?: Array<string>
     setColumns?: Array<string>
     setQueries?: Query['queries']
     setOrder?: string
