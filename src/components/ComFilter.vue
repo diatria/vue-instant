@@ -1,8 +1,10 @@
 <script lang="ts" setup>
 import type { Query, ComFormColumn } from '../types'
 import { Close, Filter, Promotion, RefreshLeft } from '@element-plus/icons-vue'
-import { reactive, ref, nextTick } from 'vue'
+import { reactive, ref, nextTick, onMounted } from 'vue'
 import FormField from './FormField.vue'
+import { get } from 'lodash'
+import type { UploadInstance } from 'element-plus'
 
 export interface ComFormProps {
   buttonFilterLoading?: boolean
@@ -13,7 +15,7 @@ interface ChangeItemPayload extends Omit<ComFormColumn, 'value'> {
   value: unknown
 }
 
-type FormRecord = Record<string, string | number | boolean | undefined>
+type FormRecord = Record<string, string | number | boolean | undefined | string | number | UploadInstance | (() => string) | never[]>
 type BreakPoint = 'default' | 'sm' | 'md' | 'lg' | 'xl'
 
 const props = defineProps<ComFormProps>()
@@ -40,6 +42,21 @@ function columnGrid(
   if (typeof column === 'number') return column
   if (typeof column === 'object' && breakPoint) return column[breakPoint]
   if (typeof column === 'object') return column['default']
+}
+
+function initializeForm() {
+  props.columns.forEach((column) => {
+    if (column.type === 'select') {
+      form[column.name] = column.value ?? ''
+    } else if (column.type === 'checkbox' || column.type === 'checkbox:label') {
+      form[column.name] = column.value ?? []
+    } else if (column.type === 'switch') {
+      form[column.name] = column.value ?? 0
+    } else {
+      // text, textarea, password, radio, date, date-time, time, slot, hide
+      form[column.name] = column.value ?? ''
+    }
+  })
 }
 
 function onChange(columnMetaData: ComFormColumn, inputValue: unknown): void {
@@ -71,12 +88,14 @@ function toQuery(): Query['queries'] {
   Object.keys(form).forEach((key) => {
     queries.push({
       field: key,
-      value: form[key],
+      value: form[key] as string | number | boolean | undefined,
     })
   })
 
   return queries
 }
+
+onMounted(() => initializeForm())
 </script>
 <template>
   <el-button :icon="Filter" @click="popoverFilter = !popoverFilter" class="m-0!">Filter</el-button>
