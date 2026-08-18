@@ -34,7 +34,7 @@ const emits = defineEmits(['back', 'onStored', 'onUpdated', 'delete', 'form', 'o
 
 const form: Record<
   string,
-  string | number | UploadInstance | Array<string | number> | (() => string)
+  ComFormColumn['value']
 > = reactive({})
 const ruleFormRef = ref<FormInstance>()
 const uploadRefs: Record<string, UploadInstance> = {}

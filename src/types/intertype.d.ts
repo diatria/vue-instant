@@ -76,7 +76,7 @@ export interface ComFormColumn {
   label?: string
   type: ComFormColumnType
   grid?: number | Record<string, number>
-  value?: string | number | UploadInstance | (() => string)
+  value?: string | number | UploadInstance | (() => string) | boolean | Array<any>
   disabled?: boolean
   select?: ComFormColumnSelect
   options?: {
