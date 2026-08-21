@@ -15,7 +15,7 @@ interface ChangeItemPayload extends Omit<ComFormColumn, 'value'> {
   value: unknown
 }
 
-type FormRecord = Record<string, string | number | boolean | undefined | string | number | UploadInstance | (() => string) | never[]>
+type FormRecord = Record<string, string | number | boolean | undefined | string | number | UploadInstance | (() => string) | any[]>
 type BreakPoint = 'default' | 'sm' | 'md' | 'lg' | 'xl'
 
 const props = defineProps<ComFormProps>()
