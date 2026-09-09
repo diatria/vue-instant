@@ -318,7 +318,7 @@ defineExpose({
         >
 
         <el-button
-          v-if="props.id"
+          v-if="props.id && !$slots.buttonStore"
           @click="update"
           :icon="Promotion"
           type="primary"
@@ -339,8 +339,8 @@ defineExpose({
           >
             Simpan
           </el-button>
-          <slot name="buttonStore" />
         </template>
+        <slot name="buttonStore" />
       </div>
     </el-form>
   </div>

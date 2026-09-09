@@ -448,7 +448,8 @@ export function resolveUrl(input: string): string {
     throw new Error('RuntimeConfig.http.baseUrl belum diset')
   }
 
-  return new URL(input.replace(/^\/+/, ''), http.baseUrl).toString()
+  const baseUrl = http.baseUrl.endsWith('/') ? http.baseUrl : `${http.baseUrl}/`
+  return new URL(input.replace(/^\/+/, ''), baseUrl).toString()
 }
 
 /**
