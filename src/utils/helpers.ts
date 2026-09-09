@@ -496,6 +496,13 @@ export function titleCase(text: string) {
   return startCase(text)
 }
 
+export function truncateText(text: string, maxLength = 100, suffix = '...') {
+  if (!text || text.length <= maxLength) return text;
+
+  // Potong teks dan hapus spasi berlebih di ujung sebelum diberi suffix
+  return text.slice(0, maxLength).trim() + suffix;
+}
+
 // # Index W
 /**
  * Delays the execution of a function by a specified amount of time.
