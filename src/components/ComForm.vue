@@ -23,6 +23,10 @@ interface ComFormProps {
   paramsUrl?: string
   queries?: ComFormPropsType['queries']
   relations?: string[]
+  permission?: {
+    store?: string
+    update?: string
+  }
   rules?: FormRules
   storeUrl?: string // for store or update data
   title?: string
@@ -318,6 +322,7 @@ defineExpose({
         >
 
         <el-button
+          v-can="props.permission?.update"
           v-if="props.id && !$slots.buttonStore"
           @click="update"
           :icon="Promotion"
@@ -330,6 +335,7 @@ defineExpose({
 
         <template v-else>
           <el-button
+            v-can="props.permission?.store"
             v-if="!$slots.buttonStore"
             @click="store"
             :icon="Promotion"
