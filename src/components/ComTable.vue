@@ -27,6 +27,11 @@ const props = withDefaults(
     description?: string
     header?: boolean
     paginationShow?: boolean
+    permission?: {
+      buttonCreate?: string
+      buttonDelete?: string
+      buttonEdit?: string
+    }
     selectionShow?: boolean
     setRelations?: Array<string>
     setRelationsCount?: Array<string>
@@ -173,11 +178,16 @@ defineExpose({ changeSelection, refresh, remove })
       <!-- Toolbar -->
       <div v-if="props.toolbarShow" class="flex justify-end gap-4">
         <slot name="toolbar-1"></slot>
-        <RouterLink v-if="props.buttonCreateUrl" :to="props.buttonCreateUrl()">
+        <RouterLink
+          v-can="props.permission?.buttonCreate"
+          v-if="props.buttonCreateUrl"
+          :to="props.buttonCreateUrl()"
+        >
           <el-button :icon="Plus" type="primary">Tambah</el-button>
         </RouterLink>
         <slot name="toolbar-2"></slot>
         <el-button
+          v-can="props.permission?.buttonDelete"
           v-if="!$slots.buttonDelete && dataSelected.length && props.buttonDeleteShow"
           @click="dialogDeleteConfirmation = true"
           :icon="Delete"
@@ -267,6 +277,7 @@ defineExpose({ changeSelection, refresh, remove })
                 </RouterLink>
                 <!-- Action Button Edit -->
                 <RouterLink
+                  v-can="props.permission?.buttonEdit"
                   v-if="typeof buttonEditUrl === 'function'"
                   :to="buttonEditUrl(scope.row)"
                 >
