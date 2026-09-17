@@ -199,7 +199,7 @@ export function http(): AxiosInstance {
     withCredentials = getAppConfig().http?.withCredentials
   }
 
-  return axios.create({
+  const client = axios.create({
     timeout: 60000,
     headers: {
       Accept: 'application/json',
@@ -208,6 +208,8 @@ export function http(): AxiosInstance {
     baseURL: import.meta.env.VITE_DS_VUE_INSTANT_BASE_URL,
     withCredentials: withCredentials ?? true,
   })
+  getAppConfig().http?.configureClient?.(client)
+  return client
 }
 
 /**

@@ -48,6 +48,7 @@ export class HttpBuilder {
           ...(this.token && { Authorization: `Bearer ${this.token}` }),
         },
       })
+      getAppConfig().http?.configureClient?.(this.instance)
     }
     return this.instance
   }

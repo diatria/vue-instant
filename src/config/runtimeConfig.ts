@@ -1,6 +1,9 @@
+import type { AxiosInstance } from 'axios'
+
 // Struktur config yang kamu butuhkan
 export interface AppConfig {
   http?: {
+    configureClient?: (client: AxiosInstance) => void
     baseUrl?: string
     withCredentials?: boolean
   }
