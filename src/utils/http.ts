@@ -7,8 +7,18 @@ export type HttpOptions = {
   with_credentials?: boolean
 }
 
+function resolveRuntimeHost(path: string) {
+  if (typeof window === 'undefined') return path
+  const configured = new URL(path, window.location.origin)
+  const currentHost = window.location.hostname
+  const isLoopback = ['localhost', '127.0.0.1', '::1'].includes(configured.hostname)
+  const currentIsLoopback = ['localhost', '127.0.0.1', '::1'].includes(currentHost)
+  if (isLoopback && !currentIsLoopback) configured.hostname = currentHost
+  return configured.toString().replace(/\/$/, '')
+}
+
 export class HttpBuilder {
-  private base_path = getAppConfig().http?.baseUrl ?? ''
+  private base_path = resolveRuntimeHost(getAppConfig().http?.baseUrl ?? '')
   private token?: string
   private with_credentials = true
 
@@ -19,7 +29,7 @@ export class HttpBuilder {
   // ========================
 
   basePath(path: string) {
-    this.base_path = path
+    this.base_path = resolveRuntimeHost(path)
     return this
   }
 
