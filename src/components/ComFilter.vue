@@ -86,10 +86,11 @@ async function resetForm(): Promise<void> {
 function toQuery(): Query['queries'] {
   const queries: Query['queries'] = []
   Object.keys(form).forEach((key) => {
-    queries.push({
-      field: key,
-      value: form[key] as string | number | boolean | undefined,
-    })
+    if (form[key] !== undefined && form[key] !== '' && form[key] !== null)
+      queries.push({
+        field: key,
+        value: form[key] as string | number | boolean | undefined,
+      })
   })
 
   return queries
