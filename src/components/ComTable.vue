@@ -1,20 +1,20 @@
 <script lang="ts" setup>
-import type { Pagination, Query } from '../types'
-import type { RouteLocationRaw } from 'vue-router'
-import { onMounted, reactive, ref } from 'vue'
-import { httpHandleError, resolveUrl } from '../utils/helpers'
-import { Delete, Edit, MoreFilled, Plus, View } from '@element-plus/icons-vue'
-import { HttpBuilder } from '../utils/http'
+import type { Pagination, Query } from '../types';
+import type { RouteLocationRaw } from 'vue-router';
+import { onMounted, reactive, ref } from 'vue';
+import { httpHandleError, resolveUrl } from '../utils/helpers';
+import { Delete, Edit, MoreFilled, Plus, View } from '@element-plus/icons-vue';
+import { HttpBuilder } from '../utils/http';
 
-const emits = defineEmits(['onReady', 'tableSelections', 'tableSelectionRaw'])
+const emits = defineEmits(['onReady', 'tableSelections', 'tableSelectionRaw']);
 const props = withDefaults(
   defineProps<{
-    buttonCreateUrl?: () => RouteLocationRaw
-    buttonEditUrl?: (row: { id: number | string }) => RouteLocationRaw
-    buttonViewUrl?: (row: { id: number | string }) => RouteLocationRaw
-    buttonMoreFieldShow?: boolean
-    buttonFilterShow?: boolean
-    buttonDeleteShow?: boolean
+    buttonCreateUrl?: () => RouteLocationRaw;
+    buttonEditUrl?: (row: { id: number | string }) => RouteLocationRaw;
+    buttonViewUrl?: (row: { id: number | string }) => RouteLocationRaw;
+    buttonMoreFieldShow?: boolean;
+    buttonFilterShow?: boolean;
+    buttonDeleteShow?: boolean;
     columns: Array<{
       field: string
       label: string
@@ -39,11 +39,11 @@ const props = withDefaults(
     setQueries?: Query['queries']
     setOrder?: string
     style?: {
-      popOverWidth: number
-    }
-    toolbarShow?: boolean
-    title?: string
-    url: string
+      popOverWidth: number;
+    };
+    toolbarShow?: boolean;
+    title?: string;
+    url: string;
   }>(),
   {
     buttonMoreFieldShow: true,
@@ -54,38 +54,38 @@ const props = withDefaults(
     selectionShow: true,
     toolbarShow: true,
   },
-)
+);
 
-const data = ref<Array<Record<string, unknown>>>([])
-const dataSelected = ref<Array<unknown>>([])
-const dialogDeleteConfirmation = ref<boolean>()
-const currentPage = ref(1)
-const http = new HttpBuilder()
-const loading = ref(true)
-const pageSize = ref(10)
-const tableRef = ref()
-const totalData = ref(0)
+const data = ref<Array<Record<string, unknown>>>([]);
+const dataSelected = ref<Array<unknown>>([]);
+const dialogDeleteConfirmation = ref<boolean>();
+const currentPage = ref(1);
+const http = new HttpBuilder();
+const loading = ref(true);
+const pageSize = ref(10);
+const tableRef = ref();
+const totalData = ref(0);
 
 const state = reactive<{ data: unknown; collection: { data: Record<string, unknown>[] } }>({
   data: {},
   collection: {
     data: [],
   },
-})
+});
 
 // Methods
 function changePage() {
-  fetchingDataFromServer()
+  fetchingDataFromServer();
 }
 
 function changeSelection(values: number[]) {
   values.map((id) => {
-    tableRef.value!.toggleRowSelection({ id })
-  })
+    tableRef.value!.toggleRowSelection({ id });
+  });
 }
 
 function fetchingDataFromServer() {
-  loading.value = true
+  loading.value = true;
   http
     .get<{ data: Pagination<Record<string, unknown>> }>(resolveUrl(props.url), {
       params: {
@@ -99,18 +99,18 @@ function fetchingDataFromServer() {
       },
     })
     .then((result) => {
-      loading.value = false
-      data.value = result.data.data.data
-      totalData.value = result.data.data.total
+      loading.value = false;
+      data.value = result.data.data.data;
+      totalData.value = result.data.data.total;
 
-      state.collection = result.data.data
+      state.collection = result.data.data;
 
-      emits('onReady', data.value)
+      emits('onReady', data.value);
     })
     .catch((error) => {
-      loading.value = false
-      httpHandleError(error)
-    })
+      loading.value = false;
+      httpHandleError(error);
+    });
 }
 
 function handleSelectionChange(val: Array<{ id: number | string }>) {
@@ -120,29 +120,29 @@ function handleSelectionChange(val: Array<{ id: number | string }>) {
   emits(
     'tableSelections',
     val.map((item) => item.id),
-  )
+  );
 
   // Emit the raw selected rows to the parent component
-  emits('tableSelectionRaw', val)
+  emits('tableSelectionRaw', val);
 }
 
 function refresh() {
-  fetchingDataFromServer()
+  fetchingDataFromServer();
 }
 
 function remove() {
   if (!props.deleteUrl) {
-    throw new Error(`Props 'delete-url' belum di inisialisasi`)
+    throw new Error(`Props 'delete-url' belum di inisialisasi`);
   }
 
   if (!dialogDeleteConfirmation.value) {
-    dialogDeleteConfirmation.value = true
-    return
+    dialogDeleteConfirmation.value = true;
+    return;
   }
 
   const ids = dataSelected.value.map((item) => {
-    return (item as { id: number | string }).id
-  })
+    return (item as { id: number | string }).id;
+  });
 
   http
     .delete(resolveUrl(props.deleteUrl), {
@@ -151,17 +151,21 @@ function remove() {
       },
     })
     .then(() => {
-      refresh()
-      dialogDeleteConfirmation.value = false
+      refresh();
+      dialogDeleteConfirmation.value = false;
     })
-    .catch(httpHandleError)
+    .catch(httpHandleError);
 }
 
 onMounted(() => {
-  fetchingDataFromServer()
-})
+  if (!props.settings?.disableOnMount) {
+    fetchingDataFromServer();
+  } else {
+    loading.value = false;
+  }
+});
 
-defineExpose({ changeSelection, refresh, remove })
+defineExpose({ changeSelection, refresh, remove });
 </script>
 
 <template>
@@ -193,8 +197,9 @@ defineExpose({ changeSelection, refresh, remove })
           :icon="Delete"
           type="danger"
           class="m-0!"
-          >Hapus</el-button
         >
+          Hapus
+        </el-button>
         <slot name="buttonDelete"></slot>
         <slot name="toolbar-3"></slot>
         <slot name="toolbar-4"></slot>
@@ -227,9 +232,7 @@ defineExpose({ changeSelection, refresh, remove })
           :width="column.width"
           :align="column.align ?? 'left'"
         >
-          <template #default="scope">{{
-            typeof column.value === 'function' ? column.value(scope.row) : ''
-          }}</template>
+          <template #default="scope">{{ typeof column.value === 'function' ? column.value(scope.row) : '' }}</template>
         </el-table-column>
         <!-- Slot -->
         <el-table-column
@@ -263,11 +266,7 @@ defineExpose({ changeSelection, refresh, remove })
               </template>
               <ul>
                 <!-- Action Button View -->
-                <RouterLink
-                  v-if="typeof buttonViewUrl === 'function'"
-                  :to="buttonViewUrl(scope.row)"
-                  target="_blank"
-                >
+                <RouterLink v-if="typeof buttonViewUrl === 'function'" :to="buttonViewUrl(scope.row)" target="_blank">
                   <li class="flex items-center py-2 px-4 hover:cursor-pointer hover:bg-slate-100">
                     <el-icon>
                       <View />
@@ -317,7 +316,7 @@ defineExpose({ changeSelection, refresh, remove })
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="dialogDeleteConfirmation = false">Cancel</el-button>
-          <el-button type="primary" @click="remove"> Confirm </el-button>
+          <el-button type="primary" @click="remove">Confirm</el-button>
         </div>
       </template>
     </el-dialog>

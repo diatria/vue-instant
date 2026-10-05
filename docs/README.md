@@ -10,6 +10,7 @@ Reusable Vue 3 components dan JS helpers untuk integrasi dengan [laravel-instant
   - [ComDialogConfirmation](./components/ComDialogConfirmation.md)
   - [ComFilter](./components/ComFilter.md)
   - [ComForm](./components/ComForm.md)
+  - [ComForm2](./components/ComForm2.md)
   - [ComSelect](./components/ComSelect.md)
   - [ComTable](./components/ComTable.md)
 - **Utilitas**
@@ -25,26 +26,27 @@ Reusable Vue 3 components dan JS helpers untuk integrasi dengan [laravel-instant
 
 Package ini membutuhkan dependensi berikut yang harus dipasang sendiri:
 
-| Package | Versi |
-|---|---|
-| `vue` | `^3.0.0` |
-| `element-plus` | `^2.9.11` |
-| `axios` | `^1.9.0` |
-| `vue-router` | `^4.5.1` |
-| `dayjs` | `^1.11.13` |
-| `lodash` | `^4.17.21` |
+| Package        | Versi      |
+| -------------- | ---------- |
+| `vue`          | `^3.0.0`   |
+| `element-plus` | `^2.9.11`  |
+| `axios`        | `^1.9.0`   |
+| `vue-router`   | `^4.5.1`   |
+| `dayjs`        | `^1.11.13` |
+| `lodash`       | `^4.17.21` |
 
 ## API Publik
 
 Yang diekspor dari `vue-instant`:
 
-**Komponen:** `ComContainer`, `ComDialogConfirmation`, `ComForm`, `ComSelect`, `ComTable`
+**Komponen:** `ComContainer`, `ComDialogConfirmation`, `ComForm`, `ComForm2`, `ComSelect`, `ComTable`
 
 **Config:** `setAppConfig`, `getAppConfig`
 
 **Helpers:** Semua fungsi dari `utils/helpers` (lihat [Helpers](./utils/helpers.md))
 
 > **Catatan:** `ComFilter` tidak diekspor dari entri utama. Import langsung jika dibutuhkan:
+>
 > ```ts
-> import ComFilter from 'vue-instant/src/components/ComFilter.vue'
+> import ComFilter from 'vue-instant/src/components/ComFilter.vue';
 > ```
