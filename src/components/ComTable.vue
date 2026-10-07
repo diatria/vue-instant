@@ -38,6 +38,9 @@ const props = withDefaults(
     setColumns?: Array<string>
     setQueries?: Query['queries']
     setOrder?: string
+    settings?: {
+      disableOnMount?: boolean
+    }
     style?: {
       popOverWidth: number;
     };
