@@ -1,9 +1,7 @@
 <script lang="ts" setup>
 import { Check, Close } from '@element-plus/icons-vue'
-import AppDatePicker from '@/components/AppDatePicker.vue'
-import AppFormSelect from '@/components/AppFormSelect.vue'
-import AppInput from '@/components/AppInput.vue'
 import type { ComFormColumn } from '../types'
+import ComSelect from './ComSelect.vue'
 
 const props = defineProps<{
   column: ComFormColumn
@@ -21,7 +19,7 @@ const handleChange = (val: any) => {
 
 <template>
   <!-- Type Text -->
-  <AppInput
+  <el-input
     v-if="column.type === 'text'"
     :model-value="modelValue"
     @update:model-value="handleChange"
@@ -30,7 +28,7 @@ const handleChange = (val: any) => {
   />
 
   <!-- Type Textarea -->
-  <AppInput
+  <el-input
     v-else-if="column.type === 'textarea'"
     :model-value="modelValue"
     @update:model-value="handleChange"
@@ -40,7 +38,7 @@ const handleChange = (val: any) => {
   />
 
   <!-- Type Select -->
-  <AppFormSelect
+  <ComSelect
     v-else-if="column.type === 'select'"
     :model-value="modelValue"
     @update:model-value="handleChange"
@@ -92,7 +90,7 @@ const handleChange = (val: any) => {
   />
 
   <!-- Type Password -->
-  <AppInput
+  <el-input
     v-else-if="column.type === 'password'"
     :model-value="modelValue"
     @update:model-value="handleChange"
@@ -111,7 +109,7 @@ const handleChange = (val: any) => {
   />
 
   <!-- Type Date -->
-  <AppDatePicker
+  <el-date-picker
     v-else-if="column.type === 'date'"
     :model-value="modelValue"
     :placeholder="column.placeholder"
@@ -122,7 +120,7 @@ const handleChange = (val: any) => {
   />
 
   <!-- Type Date Time -->
-  <AppDatePicker
+  <el-date-picker
     v-else-if="column.type === 'date-time'"
     :model-value="modelValue"
     @update:model-value="handleChange"
@@ -133,7 +131,7 @@ const handleChange = (val: any) => {
   />
 
   <!-- Type Time -->
-  <AppDatePicker
+  <el-time-picker
     v-else-if="column.type === 'time'"
     :model-value="modelValue"
     @update:model-value="handleChange"
