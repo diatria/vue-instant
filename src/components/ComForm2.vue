@@ -7,6 +7,7 @@ import type {
   UploadFile,
   UploadInstance,
   UploadRawFile,
+  UploadUserFile,
 } from 'element-plus'
 import { get } from 'lodash'
 import { onMounted, reactive, ref } from 'vue'
@@ -78,7 +79,7 @@ function handleChange(column: ComFormColumn, value: unknown) {
   emit('onChangeItem', { column, value })
 }
 
-function handleExceed(files: File[], _uploadFiles: UploadFile[], name: string) {
+function handleExceed(files: File[], _uploadFiles: UploadUserFile[], name: string) {
   const upload = uploadRefs[name]
   if (!upload) return
   upload.clearFiles()
@@ -172,7 +173,7 @@ defineExpose({ form, initializeForm, submit, loading })
                 @change="(value: UploadFile) => handleChange(column, value)"
                 @error="(error: Error) => handleUploadError(error, column.name)"
                 @exceed="
-                  (files: File[], uploadFiles: UploadFile[]) =>
+                  (files: File[], uploadFiles: UploadUserFile[]) =>
                     handleExceed(files, uploadFiles, column.name)
                 "
                 @success="(response: unknown) => handleUploadSuccess(response, column.name)"
